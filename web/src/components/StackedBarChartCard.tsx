@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   TooltipProps
 } from 'recharts';
+import { useTheme } from '@/contexts/ThemeContext';
 import type { StackedChartDataPoint } from '@/types';
 
 interface StackedBarChartCardProps {
@@ -17,12 +18,13 @@ interface StackedBarChartCardProps {
   isLoading?: boolean;
 }
 
+// Colors matching GitHub Copilot Insights dark mode
 const COLORS = {
-  edit: '#1f2937',    // Dark gray
-  ask: '#22c55e',     // Green
-  agent: '#16a34a',   // Darker green
-  custom: '#f97316',  // Orange
-  inline: '#06b6d4',  // Cyan
+  edit: '#484f58',    // Gray
+  ask: '#56d364',     // Light green
+  agent: '#3fb950',   // Green
+  custom: '#d29922',  // Orange/yellow
+  inline: '#8b949e',  // Light gray
 };
 
 const LABELS = {
@@ -57,12 +59,12 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
     const total = payload.reduce((sum, entry) => sum + (entry.value || 0), 0);
     
     return (
-      <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-dropdown dark:shadow-dark-dropdown p-3">
+      <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-dropdown dark:shadow-dark-dropdown p-3 min-w-[180px]">
         <p className="text-sm font-medium text-github-text dark:text-dark-text mb-2">
           {formatTooltipDate(label || '')}
         </p>
-        <div className="space-y-1">
-          {payload.reverse().map((entry) => (
+        <div className="space-y-1.5">
+          {[...payload].reverse().map((entry) => (
             <div key={entry.dataKey} className="flex items-center justify-between gap-4">
               <div className="flex items-center gap-2">
                 <span 
@@ -78,7 +80,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
               </span>
             </div>
           ))}
-          <div className="border-t border-github-borderLight dark:border-dark-border pt-1 mt-1 flex items-center justify-between">
+          <div className="border-t border-github-borderLight dark:border-dark-border pt-1.5 mt-1.5 flex items-center justify-between">
             <span className="text-xs font-medium text-github-textSecondary dark:text-dark-textSecondary">Total</span>
             <span className="text-xs font-semibold text-github-text dark:text-dark-text">
               {total.toLocaleString()}
@@ -93,7 +95,7 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
 
 function CustomLegend() {
   return (
-    <div className="flex items-center gap-4 justify-center mt-2">
+    <div className="flex items-center gap-4 justify-start mb-4">
       {Object.entries(LABELS).map(([key, label]) => (
         <div key={key} className="flex items-center gap-1.5">
           <span 
@@ -113,6 +115,12 @@ export function StackedBarChartCard({
   data,
   isLoading = false
 }: StackedBarChartCardProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
+  const gridColor = isDark ? '#21262d' : '#e5e7eb';
+  const axisColor = isDark ? '#8b949e' : '#9ca3af';
+
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4">
@@ -126,48 +134,48 @@ export function StackedBarChartCard({
   }
 
   return (
-    <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-dropdown transition-shadow">
+    <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-card transition-shadow">
       <h3 className="text-base font-semibold text-github-text dark:text-dark-text mb-1">{title}</h3>
-      <p className="text-xs text-github-textSecondary dark:text-dark-textSecondary mb-2">{subtitle}</p>
+      <p className="text-xs text-github-textSecondary dark:text-dark-textSecondary mb-4">{subtitle}</p>
       
       <CustomLegend />
       
-      <div className="h-64 mt-4">
+      <div className="h-64">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <CartesianGrid 
               strokeDasharray="3 3" 
-              stroke="#e5e7eb" 
+              stroke={gridColor} 
               vertical={false} 
             />
             <XAxis 
               dataKey="date" 
               tickFormatter={formatDate}
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
-              axisLine={{ stroke: '#e5e7eb' }}
+              tick={{ fontSize: 11, fill: axisColor }}
+              axisLine={{ stroke: gridColor }}
               tickLine={false}
               dy={8}
             />
             <YAxis 
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: 11, fill: axisColor }}
               axisLine={false}
               tickLine={false}
               dx={-8}
-              tickFormatter={(value) => value >= 1000 ? `${value / 1000}k` : value}
+              tickFormatter={(value) => value >= 1000 ? `${(value / 1000).toFixed(0)}k` : value}
               label={{ 
                 value: 'Requests', 
                 angle: -90, 
                 position: 'insideLeft',
-                style: { fontSize: 11, fill: '#9ca3af' },
+                style: { fontSize: 11, fill: axisColor },
                 offset: 10
               }}
             />
-            <Tooltip content={<CustomTooltip />} />
-            <Bar dataKey="edit" stackId="a" fill={COLORS.edit} radius={[0, 0, 0, 0]} />
-            <Bar dataKey="ask" stackId="a" fill={COLORS.ask} radius={[0, 0, 0, 0]} />
-            <Bar dataKey="agent" stackId="a" fill={COLORS.agent} radius={[0, 0, 0, 0]} />
-            <Bar dataKey="custom" stackId="a" fill={COLORS.custom} radius={[0, 0, 0, 0]} />
-            <Bar dataKey="inline" stackId="a" fill={COLORS.inline} radius={[4, 4, 0, 0]} />
+            <Tooltip content={<CustomTooltip />} cursor={{ fill: isDark ? 'rgba(56, 139, 253, 0.1)' : 'rgba(0,0,0,0.05)' }} />
+            <Bar dataKey="edit" stackId="a" fill={COLORS.edit} />
+            <Bar dataKey="ask" stackId="a" fill={COLORS.ask} />
+            <Bar dataKey="agent" stackId="a" fill={COLORS.agent} />
+            <Bar dataKey="custom" stackId="a" fill={COLORS.custom} />
+            <Bar dataKey="inline" stackId="a" fill={COLORS.inline} radius={[2, 2, 0, 0]} />
           </BarChart>
         </ResponsiveContainer>
       </div>

@@ -16,13 +16,13 @@ interface StatsCardProps {
 
 export function StatsCard({ title, value, subtitle, link, progress }: StatsCardProps) {
   return (
-    <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-dropdown transition-shadow">
+    <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-card transition-shadow">
       <div className="flex items-start justify-between mb-2">
         <h3 className="text-sm font-medium text-github-text dark:text-dark-text">{title}</h3>
         {link && (
           <a 
             href={link.href} 
-            className="text-xs text-primary-600 dark:text-primary-400 hover:underline flex items-center gap-1"
+            className="text-xs text-primary-600 dark:text-[#58a6ff] hover:underline flex items-center gap-1"
           >
             {link.text}
             <ExternalLink size={10} />
@@ -43,8 +43,11 @@ export function StatsCard({ title, value, subtitle, link, progress }: StatsCardP
         <div className="mb-2">
           <div className="h-2 bg-gray-100 dark:bg-dark-bgTertiary rounded-full overflow-hidden">
             <div 
-              className="h-full bg-success-500 rounded-full transition-all duration-500"
-              style={{ width: `${progress.percentage}%` }}
+              className="h-full rounded-full transition-all duration-500"
+              style={{ 
+                width: `${progress.percentage}%`,
+                backgroundColor: '#3fb950'
+              }}
             />
           </div>
         </div>

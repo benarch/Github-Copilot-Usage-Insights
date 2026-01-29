@@ -8,6 +8,7 @@ import {
   ResponsiveContainer,
   TooltipProps
 } from 'recharts';
+import { useTheme } from '@/contexts/ThemeContext';
 import type { ChartDataPoint } from '@/types';
 
 interface AreaChartCardProps {
@@ -15,6 +16,7 @@ interface AreaChartCardProps {
   subtitle: string;
   data: ChartDataPoint[];
   color?: string;
+  darkColor?: string;
   yAxisLabel?: string;
   isLoading?: boolean;
 }
@@ -37,9 +39,10 @@ function formatTooltipDate(dateStr: string): string {
 interface CustomTooltipProps extends TooltipProps<number, string> {
   label?: string;
   chartTitle: string;
+  lineColor: string;
 }
 
-function CustomTooltip({ active, payload, label, chartTitle }: CustomTooltipProps) {
+function CustomTooltip({ active, payload, label, chartTitle, lineColor }: CustomTooltipProps) {
   if (active && payload && payload.length) {
     return (
       <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-dropdown dark:shadow-dark-dropdown p-3">
@@ -47,7 +50,7 @@ function CustomTooltip({ active, payload, label, chartTitle }: CustomTooltipProp
           {formatTooltipDate(label || '')}
         </p>
         <div className="flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-primary-600" />
+          <span className="w-2 h-2 rounded-full" style={{ backgroundColor: lineColor }} />
           <span className="text-sm text-github-textSecondary dark:text-dark-textSecondary">{chartTitle}</span>
           <span className="text-sm font-semibold text-github-text dark:text-dark-text">
             {payload[0].value?.toLocaleString()} {payload[0].value === 1 ? 'user' : 'users'}
@@ -64,9 +67,19 @@ export function AreaChartCard({
   subtitle, 
   data, 
   color = '#2563eb',
+  darkColor = '#58a6ff',
   yAxisLabel = 'Users',
   isLoading = false
 }: AreaChartCardProps) {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  
+  // Use appropriate colors based on theme
+  const lineColor = isDark ? darkColor : color;
+  const gridColor = isDark ? '#21262d' : '#e5e7eb';
+  const axisColor = isDark ? '#8b949e' : '#9ca3af';
+  const cursorColor = isDark ? '#30363d' : '#d0d7de';
+
   if (isLoading) {
     return (
       <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4">
@@ -80,7 +93,7 @@ export function AreaChartCard({
   }
 
   return (
-    <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-dropdown transition-shadow">
+    <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-card transition-shadow">
       <h3 className="text-base font-semibold text-github-text dark:text-dark-text mb-1">{title}</h3>
       <p className="text-xs text-github-textSecondary dark:text-dark-textSecondary mb-4">{subtitle}</p>
       
@@ -89,25 +102,25 @@ export function AreaChartCard({
           <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
             <defs>
               <linearGradient id={`gradient-${title.replace(/\s/g, '')}`} x1="0" y1="0" x2="0" y2="1">
-                <stop offset="5%" stopColor={color} stopOpacity={0.2} />
-                <stop offset="95%" stopColor={color} stopOpacity={0.05} />
+                <stop offset="5%" stopColor={lineColor} stopOpacity={0.3} />
+                <stop offset="95%" stopColor={lineColor} stopOpacity={0.05} />
               </linearGradient>
             </defs>
             <CartesianGrid 
               strokeDasharray="3 3" 
-              stroke="#e5e7eb" 
+              stroke={gridColor} 
               vertical={false} 
             />
             <XAxis 
               dataKey="date" 
               tickFormatter={formatDate}
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
-              axisLine={{ stroke: '#e5e7eb' }}
+              tick={{ fontSize: 11, fill: axisColor }}
+              axisLine={{ stroke: gridColor }}
               tickLine={false}
               dy={8}
             />
             <YAxis 
-              tick={{ fontSize: 11, fill: '#9ca3af' }}
+              tick={{ fontSize: 11, fill: axisColor }}
               axisLine={false}
               tickLine={false}
               dx={-8}
@@ -115,22 +128,22 @@ export function AreaChartCard({
                 value: yAxisLabel, 
                 angle: -90, 
                 position: 'insideLeft',
-                style: { fontSize: 11, fill: '#9ca3af' },
+                style: { fontSize: 11, fill: axisColor },
                 offset: 10
               }}
             />
             <Tooltip 
-              content={<CustomTooltip chartTitle={title} />}
-              cursor={{ stroke: '#d0d7de', strokeDasharray: '3 3' }}
+              content={<CustomTooltip chartTitle={title} lineColor={lineColor} />}
+              cursor={{ stroke: cursorColor, strokeDasharray: '3 3' }}
             />
             <Area
               type="monotone"
               dataKey="value"
-              stroke={color}
+              stroke={lineColor}
               strokeWidth={2}
               fill={`url(#gradient-${title.replace(/\s/g, '')})`}
               dot={false}
-              activeDot={{ r: 5, fill: color, stroke: '#fff', strokeWidth: 2 }}
+              activeDot={{ r: 5, fill: lineColor, stroke: isDark ? '#0d1117' : '#fff', strokeWidth: 2 }}
             />
           </AreaChart>
         </ResponsiveContainer>

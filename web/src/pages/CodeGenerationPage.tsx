@@ -78,6 +78,7 @@ export function CodeGenerationPage() {
           yAxisLabel="Suggestions"
           isLoading={isLoading}
           color="#8b5cf6"
+          darkColor="#a371f7"
         />
         <AreaChartCard
           title="Daily accepted suggestions"
@@ -86,6 +87,7 @@ export function CodeGenerationPage() {
           yAxisLabel="Accepted"
           isLoading={isLoading}
           color="#22c55e"
+          darkColor="#3fb950"
         />
       </div>
     </div>

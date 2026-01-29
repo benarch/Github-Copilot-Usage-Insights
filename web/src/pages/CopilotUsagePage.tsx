@@ -78,12 +78,14 @@ export function CopilotUsagePage() {
           subtitle="Unique users who used Copilot on a given day, either via chat or code completions"
           data={dailyUsers || []}
           isLoading={dailyLoading}
+          darkColor="#58a6ff"
         />
         <AreaChartCard
           title="IDE weekly active users"
           subtitle="Unique users who used Copilot on a given week, either via chat or code completions"
           data={weeklyUsers || []}
           isLoading={weeklyLoading}
+          darkColor="#58a6ff"
         />
       </div>
 
@@ -95,6 +97,7 @@ export function CopilotUsagePage() {
           data={avgChatRequests || []}
           yAxisLabel="Requests"
           isLoading={avgChatLoading}
+          darkColor="#58a6ff"
         />
       </div>
 

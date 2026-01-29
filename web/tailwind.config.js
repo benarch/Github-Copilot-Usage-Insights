@@ -34,15 +34,19 @@ export default {
           800: '#166534',
           900: '#14532d',
         },
-        // Chart colors
+        // Chart colors matching GitHub Copilot Insights
         chart: {
-          blue: '#2563eb',
-          lightBlue: '#93c5fd',
-          green: '#22c55e',
-          lightGreen: '#86efac',
-          purple: '#8b5cf6',
-          orange: '#f97316',
-          cyan: '#06b6d4',
+          blue: '#58a6ff',
+          lightBlue: '#79c0ff',
+          green: '#3fb950',
+          lightGreen: '#56d364',
+          darkGreen: '#238636',
+          purple: '#a371f7',
+          lightPurple: '#bc8cff',
+          orange: '#d29922',
+          cyan: '#39c5cf',
+          pink: '#db61a2',
+          gray: '#484f58',
         },
         // Gray scale matching GitHub UI
         github: {
@@ -60,8 +64,10 @@ export default {
           bgSecondary: '#161b22',
           bgTertiary: '#21262d',
           border: '#30363d',
+          borderLight: '#21262d',
           text: '#e6edf3',
           textSecondary: '#8b949e',
+          textMuted: '#6e7681',
         }
       },
       fontFamily: {
@@ -72,6 +78,7 @@ export default {
         cardHover: '0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05)',
         dropdown: '0 8px 24px rgba(149,157,165,0.2)',
         'dark-dropdown': '0 8px 24px rgba(0,0,0,0.4)',
+        'dark-card': '0 0 0 1px rgba(48,54,61,0.5)',
       }
     },
   },
