@@ -30,7 +30,7 @@ const navItems = [
   { icon: Users2, label: 'Teams', href: '#' },
   { icon: Users, label: 'People', href: '#' },
   { icon: BarChart3, label: 'Insights', href: '/insights/copilot-usage' },
-  { icon: Table2, label: 'Table view', href: '/table-view' },
+  { icon: Table2, label: 'Table view', href: '/table-view/summary' },
 ];
 
 export function Header() {
@@ -38,7 +38,7 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
   const isInsightsActive = location.pathname.startsWith('/insights');
   const isOverviewActive = location.pathname === '/overview';
-  const isTableViewActive = location.pathname === '/table-view';
+  const isTableViewActive = location.pathname.startsWith('/table-view');
 
   return (
     <header className="bg-white dark:bg-dark-bgSecondary border-b border-github-border dark:border-dark-border transition-colors duration-200">

@@ -3,6 +3,19 @@ import { useUserDetails } from '@/hooks/useUsageData';
 import { Timeframe } from '@/types';
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 
+function formatDateRange(days: number): string {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(end.getDate() - days + 1);
+  
+  const formatDate = (d: Date) => d.toLocaleDateString('en-US', { 
+    month: 'short', 
+    day: 'numeric'
+  });
+  
+  return `${formatDate(start)} - ${formatDate(end)}`;
+}
+
 export function TableViewPage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('7');
   const [page, setPage] = useState(1);
@@ -11,9 +24,9 @@ export function TableViewPage() {
   const { data, isLoading, error } = useUserDetails(timeframe, page, limit);
 
   const timeframeOptions: { value: Timeframe; label: string }[] = [
-    { value: '7', label: 'Last 7 days' },
-    { value: '14', label: 'Last 14 days' },
-    { value: '28', label: 'Last 28 days' },
+    { value: '7', label: `Last 7 days (${formatDateRange(7)})` },
+    { value: '14', label: `Last 14 days (${formatDateRange(14)})` },
+    { value: '28', label: `Last 28 days (${formatDateRange(28)})` },
   ];
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;
@@ -24,7 +37,7 @@ export function TableViewPage() {
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-semibold text-gray-900 dark:text-dark-text">
-            User Usage Details
+            Detailed Report
           </h1>
           <div className="flex items-center gap-4">
             <select
