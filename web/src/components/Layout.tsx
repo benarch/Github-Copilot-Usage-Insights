@@ -8,7 +8,7 @@ interface LayoutProps {
 
 export function Layout({ children }: LayoutProps) {
   return (
-    <div className="min-h-screen bg-github-bgSecondary">
+    <div className="min-h-screen bg-github-bgSecondary dark:bg-dark-bg transition-colors duration-200">
       <Header />
       <div className="flex">
         <Sidebar />

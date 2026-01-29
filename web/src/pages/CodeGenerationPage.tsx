@@ -26,22 +26,22 @@ export function CodeGenerationPage() {
       {/* Page Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
-          <h1 className="text-xl font-semibold text-github-text">Code generation</h1>
-          <button className="text-github-textSecondary hover:text-github-text transition-colors">
+          <h1 className="text-xl font-semibold text-github-text dark:text-dark-text">Code generation</h1>
+          <button className="text-github-textSecondary dark:text-dark-textSecondary hover:text-github-text dark:hover:text-dark-text transition-colors">
             <Info size={16} />
           </button>
         </div>
         
         <div className="flex items-center gap-3">
-          <span className="px-2 py-0.5 bg-primary-50 text-primary-700 text-xs font-medium rounded-full border border-primary-200">
+          <span className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium rounded-full border border-primary-200 dark:border-primary-800">
             Preview
           </span>
-          <a href="#" className="text-sm text-primary-600 hover:underline">
+          <a href="#" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
             Give feedback
           </a>
           <TimeframeDropdown value={timeframe} onChange={setTimeframe} />
-          <button className="p-2 hover:bg-github-bgSecondary border border-github-border rounded-md transition-colors">
-            <Download size={16} className="text-github-textSecondary" />
+          <button className="p-2 hover:bg-github-bgSecondary dark:hover:bg-dark-bgTertiary border border-github-border dark:border-dark-border rounded-md transition-colors">
+            <Download size={16} className="text-github-textSecondary dark:text-dark-textSecondary" />
           </button>
         </div>
       </div>

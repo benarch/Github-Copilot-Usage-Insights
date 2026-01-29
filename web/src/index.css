@@ -2,9 +2,15 @@
 @tailwind components;
 @tailwind utilities;
 
-body {
-  @apply bg-github-bgSecondary text-github-text antialiased;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+@layer base {
+  body {
+    @apply bg-github-bgSecondary text-github-text antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  }
+
+  html.dark body {
+    @apply bg-dark-bg text-dark-text;
+  }
 }
 
 /* Custom scrollbar */
@@ -17,12 +23,24 @@ body {
   @apply bg-github-bgSecondary;
 }
 
+html.dark ::-webkit-scrollbar-track {
+  @apply bg-dark-bg;
+}
+
 ::-webkit-scrollbar-thumb {
   @apply bg-github-border rounded-full;
 }
 
+html.dark ::-webkit-scrollbar-thumb {
+  @apply bg-dark-border;
+}
+
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-github-textSecondary;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-dark-textSecondary;
 }
 
 /* Chart tooltip styles */

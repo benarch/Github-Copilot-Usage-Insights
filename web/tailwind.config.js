@@ -4,6 +4,7 @@ export default {
     "./index.html",
     "./src/**/*.{js,ts,jsx,tsx}",
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       colors: {
@@ -52,6 +53,15 @@ export default {
           text: '#1f2937',
           textSecondary: '#6b7280',
           textMuted: '#9ca3af',
+        },
+        // GitHub Dark mode colors
+        dark: {
+          bg: '#0d1117',
+          bgSecondary: '#161b22',
+          bgTertiary: '#21262d',
+          border: '#30363d',
+          text: '#e6edf3',
+          textSecondary: '#8b949e',
         }
       },
       fontFamily: {
@@ -61,6 +71,7 @@ export default {
         card: '0 1px 3px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.06)',
         cardHover: '0 4px 6px rgba(0,0,0,0.07), 0 2px 4px rgba(0,0,0,0.05)',
         dropdown: '0 8px 24px rgba(149,157,165,0.2)',
+        'dark-dropdown': '0 8px 24px rgba(0,0,0,0.4)',
       }
     },
   },

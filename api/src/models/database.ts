@@ -67,12 +67,38 @@ export function createDatabase(inMemory = false): Database.Database {
       created_at TEXT DEFAULT CURRENT_TIMESTAMP
     );
 
+    -- User-level usage details for Table View
+    CREATE TABLE IF NOT EXISTS user_usage_details (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      report_start_day TEXT NOT NULL,
+      report_end_day TEXT NOT NULL,
+      day TEXT NOT NULL,
+      enterprise_id TEXT NOT NULL,
+      user_id TEXT NOT NULL,
+      user_login TEXT NOT NULL,
+      user_initiated_interaction_count INTEGER NOT NULL DEFAULT 0,
+      code_generation_activity_count INTEGER NOT NULL DEFAULT 0,
+      code_acceptance_activity_count INTEGER NOT NULL DEFAULT 0,
+      used_agent INTEGER NOT NULL DEFAULT 0,
+      used_chat INTEGER NOT NULL DEFAULT 0,
+      loc_suggested_to_add_sum INTEGER NOT NULL DEFAULT 0,
+      loc_suggested_to_delete_sum INTEGER NOT NULL DEFAULT 0,
+      loc_added_sum INTEGER NOT NULL DEFAULT 0,
+      loc_deleted_sum INTEGER NOT NULL DEFAULT 0,
+      primary_ide TEXT,
+      primary_ide_version TEXT,
+      primary_plugin_version TEXT,
+      created_at TEXT DEFAULT CURRENT_TIMESTAMP,
+      UNIQUE(day, user_id)
+    );
+
     -- Indexes for better query performance
     CREATE INDEX IF NOT EXISTS idx_daily_usage_date ON daily_usage(date);
     CREATE INDEX IF NOT EXISTS idx_weekly_usage_week_start ON weekly_usage(week_start);
     CREATE INDEX IF NOT EXISTS idx_chat_mode_requests_date ON chat_mode_requests(date);
     CREATE INDEX IF NOT EXISTS idx_model_usage_date ON model_usage(date);
     CREATE INDEX IF NOT EXISTS idx_agent_adoption_date ON agent_adoption(date);
+    CREATE INDEX IF NOT EXISTS idx_user_usage_details_day ON user_usage_details(day);
   `);
 
   return db;

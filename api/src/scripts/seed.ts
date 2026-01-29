@@ -11,11 +11,24 @@ function generateSeedData() {
     DELETE FROM chat_mode_requests;
     DELETE FROM model_usage;
     DELETE FROM agent_adoption;
+    DELETE FROM user_usage_details;
   `);
 
   const today = new Date();
   const modes = ['edit', 'ask', 'agent', 'custom', 'inline'] as const;
   const models = ['Claude Sonnet 4.5', 'GPT-4o', 'Claude Opus 4', 'Gemini Pro'];
+
+  // Sample user logins for user_usage_details
+  const userLogins = [
+    'alice-dev', 'bob-engineer', 'charlie-ops', 'diana-sre', 'eve-frontend',
+    'frank-backend', 'grace-fullstack', 'henry-devops', 'iris-data', 'jack-ml',
+    'kate-security', 'leo-platform', 'maya-mobile', 'nick-architect', 'olivia-qa',
+    'peter-lead', 'quinn-intern', 'rachel-senior', 'sam-junior', 'tina-manager',
+    'uma-consultant', 'victor-contractor', 'wendy-staff', 'xander-principal', 'yuki-designer'
+  ];
+  const ides = ['VS Code', 'IntelliJ IDEA', 'PyCharm', 'WebStorm', 'Visual Studio', 'Neovim'];
+  const ideVersions = ['1.85.0', '1.86.0', '1.87.0', '2023.3', '2024.1', '17.8'];
+  const pluginVersions = ['1.150.0', '1.151.0', '1.152.0', '1.153.0'];
 
   // Generate 60 days of data
   for (let i = 59; i >= 0; i--) {
@@ -97,6 +110,51 @@ function generateSeedData() {
       INSERT INTO agent_adoption (date, total_active_users, agent_users)
       VALUES (?, ?, ?)
     `).run(dateStr, activeUsers, agentUsers);
+
+    // Insert user-level usage details (only for last 28 days)
+    if (i < 28) {
+      const reportStartDay = new Date(today);
+      reportStartDay.setDate(reportStartDay.getDate() - 27);
+      const reportEndDay = today;
+
+      for (const userLogin of userLogins) {
+        const userId = `u-${Math.random().toString(36).substr(2, 8)}`;
+        const enterpriseId = 'ent-copilot-insights';
+        const usedAgent = Math.random() > 0.15 ? 1 : 0;
+        const usedChat = Math.random() > 0.1 ? 1 : 0;
+        const ide = ides[Math.floor(Math.random() * ides.length)];
+        const ideVersion = ideVersions[Math.floor(Math.random() * ideVersions.length)];
+        const pluginVersion = pluginVersions[Math.floor(Math.random() * pluginVersions.length)];
+
+        db.prepare(`
+          INSERT OR REPLACE INTO user_usage_details (
+            report_start_day, report_end_day, day, enterprise_id, user_id, user_login,
+            user_initiated_interaction_count, code_generation_activity_count, code_acceptance_activity_count,
+            used_agent, used_chat, loc_suggested_to_add_sum, loc_suggested_to_delete_sum,
+            loc_added_sum, loc_deleted_sum, primary_ide, primary_ide_version, primary_plugin_version
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        `).run(
+          reportStartDay.toISOString().split('T')[0],
+          reportEndDay.toISOString().split('T')[0],
+          dateStr,
+          enterpriseId,
+          userId,
+          userLogin,
+          Math.floor(Math.random() * 50) + 5,
+          Math.floor(Math.random() * 100) + 10,
+          Math.floor(Math.random() * 80) + 5,
+          usedAgent,
+          usedChat,
+          Math.floor(Math.random() * 500) + 50,
+          Math.floor(Math.random() * 100) + 10,
+          Math.floor(Math.random() * 400) + 40,
+          Math.floor(Math.random() * 80) + 5,
+          ide,
+          ideVersion,
+          pluginVersion
+        );
+      }
+    }
   }
 
   // Generate weekly data

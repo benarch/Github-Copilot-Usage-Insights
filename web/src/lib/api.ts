@@ -3,7 +3,8 @@ import type {
   DashboardSummary, 
   ChartDataPoint, 
   StackedChartDataPoint,
-  CodeGenerationStats 
+  CodeGenerationStats,
+  UserUsageDetailsResponse
 } from '@/types';
 
 const API_BASE = '/api/usage';
@@ -38,4 +39,12 @@ export async function fetchChatModeRequests(timeframe: Timeframe): Promise<Stack
 
 export async function fetchCodeGeneration(timeframe: Timeframe): Promise<CodeGenerationStats> {
   return fetchJson(`${API_BASE}/code-generation?timeframe=${timeframe}`);
+}
+
+export async function fetchUserDetails(
+  timeframe: Timeframe, 
+  page: number = 1, 
+  limit: number = 50
+): Promise<UserUsageDetailsResponse> {
+  return fetchJson(`${API_BASE}/user-details?timeframe=${timeframe}&page=${page}&limit=${limit}`);
 }

@@ -43,3 +43,10 @@ export function useCodeGeneration(timeframe: Timeframe) {
     queryFn: () => api.fetchCodeGeneration(timeframe),
   });
 }
+
+export function useUserDetails(timeframe: Timeframe, page: number, limit: number) {
+  return useQuery({
+    queryKey: ['userDetails', timeframe, page, limit],
+    queryFn: () => api.fetchUserDetails(timeframe, page, limit),
+  });
+}

@@ -57,8 +57,8 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
     const total = payload.reduce((sum, entry) => sum + (entry.value || 0), 0);
     
     return (
-      <div className="bg-white border border-github-border rounded-lg shadow-dropdown p-3">
-        <p className="text-sm font-medium text-github-text mb-2">
+      <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-dropdown dark:shadow-dark-dropdown p-3">
+        <p className="text-sm font-medium text-github-text dark:text-dark-text mb-2">
           {formatTooltipDate(label || '')}
         </p>
         <div className="space-y-1">
@@ -69,18 +69,18 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
                   className="w-3 h-3 rounded-sm" 
                   style={{ backgroundColor: entry.color }}
                 />
-                <span className="text-xs text-github-textSecondary">
+                <span className="text-xs text-github-textSecondary dark:text-dark-textSecondary">
                   {LABELS[entry.dataKey as keyof typeof LABELS]}
                 </span>
               </div>
-              <span className="text-xs font-medium text-github-text">
+              <span className="text-xs font-medium text-github-text dark:text-dark-text">
                 {entry.value?.toLocaleString()}
               </span>
             </div>
           ))}
-          <div className="border-t border-github-borderLight pt-1 mt-1 flex items-center justify-between">
-            <span className="text-xs font-medium text-github-textSecondary">Total</span>
-            <span className="text-xs font-semibold text-github-text">
+          <div className="border-t border-github-borderLight dark:border-dark-border pt-1 mt-1 flex items-center justify-between">
+            <span className="text-xs font-medium text-github-textSecondary dark:text-dark-textSecondary">Total</span>
+            <span className="text-xs font-semibold text-github-text dark:text-dark-text">
               {total.toLocaleString()}
             </span>
           </div>
@@ -100,7 +100,7 @@ function CustomLegend() {
             className="w-3 h-3 rounded-sm" 
             style={{ backgroundColor: COLORS[key as keyof typeof COLORS] }}
           />
-          <span className="text-xs text-github-textSecondary">{label}</span>
+          <span className="text-xs text-github-textSecondary dark:text-dark-textSecondary">{label}</span>
         </div>
       ))}
     </div>
@@ -115,20 +115,20 @@ export function StackedBarChartCard({
 }: StackedBarChartCardProps) {
   if (isLoading) {
     return (
-      <div className="bg-white border border-github-border rounded-lg p-4">
+      <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/3 mb-2" />
-          <div className="h-3 bg-gray-200 rounded w-2/3 mb-4" />
-          <div className="h-64 bg-gray-100 rounded" />
+          <div className="h-4 bg-gray-200 dark:bg-dark-bgTertiary rounded w-1/3 mb-2" />
+          <div className="h-3 bg-gray-200 dark:bg-dark-bgTertiary rounded w-2/3 mb-4" />
+          <div className="h-64 bg-gray-100 dark:bg-dark-bgTertiary rounded" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-github-border rounded-lg p-4 hover:shadow-cardHover transition-shadow">
-      <h3 className="text-base font-semibold text-github-text mb-1">{title}</h3>
-      <p className="text-xs text-github-textSecondary mb-2">{subtitle}</p>
+    <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-dropdown transition-shadow">
+      <h3 className="text-base font-semibold text-github-text dark:text-dark-text mb-1">{title}</h3>
+      <p className="text-xs text-github-textSecondary dark:text-dark-textSecondary mb-2">{subtitle}</p>
       
       <CustomLegend />
       

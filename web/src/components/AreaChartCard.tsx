@@ -42,14 +42,14 @@ interface CustomTooltipProps extends TooltipProps<number, string> {
 function CustomTooltip({ active, payload, label, chartTitle }: CustomTooltipProps) {
   if (active && payload && payload.length) {
     return (
-      <div className="bg-white border border-github-border rounded-lg shadow-dropdown p-3">
-        <p className="text-sm font-medium text-github-text mb-1">
+      <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-dropdown dark:shadow-dark-dropdown p-3">
+        <p className="text-sm font-medium text-github-text dark:text-dark-text mb-1">
           {formatTooltipDate(label || '')}
         </p>
         <div className="flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-primary-600" />
-          <span className="text-sm text-github-textSecondary">{chartTitle}</span>
-          <span className="text-sm font-semibold text-github-text">
+          <span className="text-sm text-github-textSecondary dark:text-dark-textSecondary">{chartTitle}</span>
+          <span className="text-sm font-semibold text-github-text dark:text-dark-text">
             {payload[0].value?.toLocaleString()} {payload[0].value === 1 ? 'user' : 'users'}
           </span>
         </div>
@@ -69,20 +69,20 @@ export function AreaChartCard({
 }: AreaChartCardProps) {
   if (isLoading) {
     return (
-      <div className="bg-white border border-github-border rounded-lg p-4">
+      <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4">
         <div className="animate-pulse">
-          <div className="h-4 bg-gray-200 rounded w-1/3 mb-2" />
-          <div className="h-3 bg-gray-200 rounded w-2/3 mb-4" />
-          <div className="h-48 bg-gray-100 rounded" />
+          <div className="h-4 bg-gray-200 dark:bg-dark-bgTertiary rounded w-1/3 mb-2" />
+          <div className="h-3 bg-gray-200 dark:bg-dark-bgTertiary rounded w-2/3 mb-4" />
+          <div className="h-48 bg-gray-100 dark:bg-dark-bgTertiary rounded" />
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-github-border rounded-lg p-4 hover:shadow-cardHover transition-shadow">
-      <h3 className="text-base font-semibold text-github-text mb-1">{title}</h3>
-      <p className="text-xs text-github-textSecondary mb-4">{subtitle}</p>
+    <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-dropdown transition-shadow">
+      <h3 className="text-base font-semibold text-github-text dark:text-dark-text mb-1">{title}</h3>
+      <p className="text-xs text-github-textSecondary dark:text-dark-textSecondary mb-4">{subtitle}</p>
       
       <div className="h-48">
         <ResponsiveContainer width="100%" height="100%">

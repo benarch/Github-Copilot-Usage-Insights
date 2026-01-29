@@ -33,3 +33,31 @@ export interface CodeGenerationStats {
   acceptanceRate: number;
   dailyData: Array<{ date: string; suggestions: number; accepted: number }>;
 }
+
+export interface UserUsageDetail {
+  report_start_day: string;
+  report_end_day: string;
+  day: string;
+  enterprise_id: string;
+  user_id: string;
+  user_login: string;
+  user_initiated_interaction_count: number;
+  code_generation_activity_count: number;
+  code_acceptance_activity_count: number;
+  used_agent: boolean;
+  used_chat: boolean;
+  loc_suggested_to_add_sum: number;
+  loc_suggested_to_delete_sum: number;
+  loc_added_sum: number;
+  loc_deleted_sum: number;
+  primary_ide: string | null;
+  primary_ide_version: string | null;
+  primary_plugin_version: string | null;
+}
+
+export interface UserUsageDetailsResponse {
+  data: UserUsageDetail[];
+  total: number;
+  page: number;
+  limit: number;
+}

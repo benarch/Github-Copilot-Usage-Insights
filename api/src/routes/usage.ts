@@ -167,4 +167,43 @@ router.get('/code-generation', (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @openapi
+ * /api/usage/user-details:
+ *   get:
+ *     summary: Get user-level usage details for table view
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *     responses:
+ *       200:
+ *         description: User usage details with pagination
+ */
+router.get('/user-details', (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const data = usageController.getUserUsageDetails(timeframe, page, limit);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid parameters' });
+  }
+});
+
 export default router;

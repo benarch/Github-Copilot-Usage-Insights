@@ -11,6 +11,34 @@ import type {
   Timeframe
 } from '../models/types.js';
 
+interface UserUsageDetail {
+  report_start_day: string;
+  report_end_day: string;
+  day: string;
+  enterprise_id: string;
+  user_id: string;
+  user_login: string;
+  user_initiated_interaction_count: number;
+  code_generation_activity_count: number;
+  code_acceptance_activity_count: number;
+  used_agent: boolean;
+  used_chat: boolean;
+  loc_suggested_to_add_sum: number;
+  loc_suggested_to_delete_sum: number;
+  loc_added_sum: number;
+  loc_deleted_sum: number;
+  primary_ide: string | null;
+  primary_ide_version: string | null;
+  primary_plugin_version: string | null;
+}
+
+interface UserUsageDetailsResponse {
+  data: UserUsageDetail[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
 function getDateRange(days: number): { startDate: string; endDate: string } {
   const endDate = new Date();
   const startDate = new Date();
@@ -169,5 +197,65 @@ export function getCodeGenerationStats(timeframe: Timeframe): {
     acceptedSuggestions,
     acceptanceRate: totalSuggestions > 0 ? Math.round((acceptedSuggestions / totalSuggestions) * 100) : 0,
     dailyData,
+  };
+}
+
+export function getUserUsageDetails(
+  timeframe: Timeframe,
+  page: number = 1,
+  limit: number = 50
+): UserUsageDetailsResponse {
+  const db = getDatabase();
+  const days = parseInt(timeframe);
+  const { startDate, endDate } = getDateRange(days);
+  const offset = (page - 1) * limit;
+
+  // Get total count
+  const countRow = db.prepare(`
+    SELECT COUNT(*) as total FROM user_usage_details 
+    WHERE day BETWEEN ? AND ?
+  `).get(startDate, endDate) as { total: number };
+
+  // Get paginated data
+  const rows = db.prepare(`
+    SELECT 
+      report_start_day, report_end_day, day, enterprise_id, user_id, user_login,
+      user_initiated_interaction_count, code_generation_activity_count, code_acceptance_activity_count,
+      used_agent, used_chat, loc_suggested_to_add_sum, loc_suggested_to_delete_sum,
+      loc_added_sum, loc_deleted_sum, primary_ide, primary_ide_version, primary_plugin_version
+    FROM user_usage_details 
+    WHERE day BETWEEN ? AND ?
+    ORDER BY day DESC, user_login ASC
+    LIMIT ? OFFSET ?
+  `).all(startDate, endDate, limit, offset) as Array<{
+    report_start_day: string;
+    report_end_day: string;
+    day: string;
+    enterprise_id: string;
+    user_id: string;
+    user_login: string;
+    user_initiated_interaction_count: number;
+    code_generation_activity_count: number;
+    code_acceptance_activity_count: number;
+    used_agent: number;
+    used_chat: number;
+    loc_suggested_to_add_sum: number;
+    loc_suggested_to_delete_sum: number;
+    loc_added_sum: number;
+    loc_deleted_sum: number;
+    primary_ide: string | null;
+    primary_ide_version: string | null;
+    primary_plugin_version: string | null;
+  }>;
+
+  return {
+    data: rows.map(row => ({
+      ...row,
+      used_agent: row.used_agent === 1,
+      used_chat: row.used_chat === 1,
+    })),
+    total: countRow.total,
+    page,
+    limit,
   };
 }

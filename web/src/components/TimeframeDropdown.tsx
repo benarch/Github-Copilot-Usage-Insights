@@ -34,14 +34,14 @@ export function TimeframeDropdown({ value, onChange }: TimeframeDropdownProps) {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-1.5 bg-github-bgSecondary border border-github-border rounded-md text-sm font-medium text-github-text hover:bg-gray-100 transition-colors"
+        className="flex items-center gap-2 px-3 py-1.5 bg-github-bgSecondary dark:bg-dark-bgTertiary border border-github-border dark:border-dark-border rounded-md text-sm font-medium text-github-text dark:text-dark-text hover:bg-gray-100 dark:hover:bg-dark-bgSecondary transition-colors"
       >
         <span>Timeframe: {selectedLabel}</span>
         <ChevronDown size={14} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
       </button>
       
       {isOpen && (
-        <div className="absolute right-0 mt-1 w-44 bg-white border border-github-border rounded-md shadow-dropdown z-50 animate-fade-in">
+        <div className="absolute right-0 mt-1 w-44 bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-md shadow-dropdown dark:shadow-dark-dropdown z-50 animate-fade-in">
           <div className="py-1">
             {options.map((option) => (
               <button
@@ -50,11 +50,11 @@ export function TimeframeDropdown({ value, onChange }: TimeframeDropdownProps) {
                   onChange(option.value);
                   setIsOpen(false);
                 }}
-                className="w-full flex items-center justify-between px-3 py-2 text-sm text-github-text hover:bg-github-bgSecondary transition-colors"
+                className="w-full flex items-center justify-between px-3 py-2 text-sm text-github-text dark:text-dark-text hover:bg-github-bgSecondary dark:hover:bg-dark-bgTertiary transition-colors"
               >
                 <span>{option.label}</span>
                 {value === option.value && (
-                  <Check size={14} className="text-primary-600" />
+                  <Check size={14} className="text-primary-600 dark:text-primary-400" />
                 )}
               </button>
             ))}
