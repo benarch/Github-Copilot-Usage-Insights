@@ -61,3 +61,9 @@ export interface UserUsageDetailsResponse {
   page: number;
   limit: number;
 }
+
+export interface IDEUsageData {
+  ide: string;
+  users: number;
+  interactions: number;
+}

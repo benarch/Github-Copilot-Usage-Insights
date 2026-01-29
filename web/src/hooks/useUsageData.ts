@@ -50,3 +50,10 @@ export function useUserDetails(timeframe: Timeframe, page: number, limit: number
     queryFn: () => api.fetchUserDetails(timeframe, page, limit),
   });
 }
+
+export function useIDEUsage(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['ideUsage', timeframe],
+    queryFn: () => api.fetchIDEUsage(timeframe),
+  });
+}

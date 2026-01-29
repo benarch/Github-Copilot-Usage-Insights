@@ -206,4 +206,31 @@ router.get('/user-details', (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @openapi
+ * /api/usage/ide-usage:
+ *   get:
+ *     summary: Get IDE usage statistics
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *     responses:
+ *       200:
+ *         description: IDE usage breakdown with user counts and interactions
+ */
+router.get('/ide-usage', (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = usageController.getIDEUsageStats(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
 export default router;

@@ -259,3 +259,28 @@ export function getUserUsageDetails(
     limit,
   };
 }
+
+export interface IDEUsageData {
+  ide: string;
+  users: number;
+  interactions: number;
+}
+
+export function getIDEUsageStats(timeframe: Timeframe): IDEUsageData[] {
+  const db = getDatabase();
+  const days = parseInt(timeframe);
+  const { startDate, endDate } = getDateRange(days);
+
+  const rows = db.prepare(`
+    SELECT 
+      COALESCE(primary_ide, 'Unknown') as ide,
+      COUNT(DISTINCT user_id) as users,
+      SUM(user_initiated_interaction_count) as interactions
+    FROM user_usage_details 
+    WHERE day BETWEEN ? AND ?
+    GROUP BY COALESCE(primary_ide, 'Unknown')
+    ORDER BY users DESC
+  `).all(startDate, endDate) as IDEUsageData[];
+
+  return rows;
+}

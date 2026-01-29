@@ -1,7 +1,18 @@
 import { useState } from 'react';
 import { Timeframe } from '@/types';
-import { useSummary, useCodeGeneration } from '@/hooks/useUsageData';
-import { Loader2, Users, Bot, MessageSquare, Code2, CheckCircle } from 'lucide-react';
+import { useSummary, useCodeGeneration, useIDEUsage } from '@/hooks/useUsageData';
+import { useTheme } from '@/contexts/ThemeContext';
+import { Loader2, Users, Bot, MessageSquare, Code2, CheckCircle, Monitor } from 'lucide-react';
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer,
+  Cell,
+} from 'recharts';
 
 function formatDateRange(days: number): { start: string; end: string; label: string } {
   const end = new Date();
@@ -23,11 +34,17 @@ function formatDateRange(days: number): { start: string; end: string; label: str
 
 export function SummaryReportPage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('28');
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
   
   const { data: summary, isLoading: summaryLoading } = useSummary(timeframe);
   const { data: codeGen, isLoading: codeGenLoading } = useCodeGeneration(timeframe);
+  const { data: ideUsage, isLoading: ideLoading } = useIDEUsage(timeframe);
 
-  const isLoading = summaryLoading || codeGenLoading;
+  const isLoading = summaryLoading || codeGenLoading || ideLoading;
+
+  // IDE bar colors
+  const ideColors = ['#58a6ff', '#3fb950', '#a371f7', '#d29922', '#f85149', '#8b949e'];
 
   const timeframeOptions: { value: Timeframe; label: string; range: string }[] = [
     { value: '7', label: 'Last 7 days', range: formatDateRange(7).label },
@@ -73,7 +90,7 @@ export function SummaryReportPage() {
         )}
 
         {/* Summary Cards */}
-        {!isLoading && summary && codeGen && (
+        {!isLoading && summary && codeGen && ideUsage && (
           <div className="space-y-8">
             {/* Usage Overview Section */}
             <section>
@@ -193,6 +210,98 @@ export function SummaryReportPage() {
                     </div>
                     <MessageSquare className="w-10 h-10 text-[#58a6ff] opacity-50" />
                   </div>
+                </div>
+              </div>
+            </section>
+
+            {/* IDE Usage Bar Chart Section */}
+            <section>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-4 flex items-center gap-2">
+                <Monitor className="w-5 h-5 text-[#58a6ff]" />
+                IDE Usage Distribution
+              </h2>
+              <div className="bg-white dark:bg-dark-bgSecondary border border-gray-200 dark:border-dark-border rounded-lg p-6">
+                <div className="h-80">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <BarChart
+                      data={ideUsage}
+                      margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+                      barCategoryGap="20%"
+                    >
+                      <CartesianGrid 
+                        strokeDasharray="3 3" 
+                        stroke={isDark ? '#21262d' : '#e5e7eb'} 
+                        vertical={false}
+                      />
+                      <XAxis 
+                        dataKey="ide" 
+                        tick={{ fill: isDark ? '#8b949e' : '#6b7280', fontSize: 12 }}
+                        axisLine={{ stroke: isDark ? '#30363d' : '#d1d5db' }}
+                        tickLine={{ stroke: isDark ? '#30363d' : '#d1d5db' }}
+                        angle={-45}
+                        textAnchor="end"
+                        height={70}
+                        interval={0}
+                      />
+                      <YAxis 
+                        tick={{ fill: isDark ? '#8b949e' : '#6b7280', fontSize: 12 }}
+                        axisLine={{ stroke: isDark ? '#30363d' : '#d1d5db' }}
+                        tickLine={{ stroke: isDark ? '#30363d' : '#d1d5db' }}
+                        label={{ 
+                          value: 'Users', 
+                          angle: -90, 
+                          position: 'insideLeft',
+                          fill: isDark ? '#8b949e' : '#6b7280',
+                          style: { textAnchor: 'middle' }
+                        }}
+                      />
+                      <Tooltip 
+                        contentStyle={{
+                          backgroundColor: isDark ? '#161b22' : '#ffffff',
+                          border: `1px solid ${isDark ? '#30363d' : '#e5e7eb'}`,
+                          borderRadius: '8px',
+                          boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                        }}
+                        labelStyle={{ 
+                          color: isDark ? '#e6edf3' : '#111827',
+                          fontWeight: 600,
+                          marginBottom: '4px'
+                        }}
+                        itemStyle={{ color: isDark ? '#8b949e' : '#6b7280' }}
+                        formatter={(value: number, name: string) => {
+                          if (name === 'users') return [`${value.toLocaleString()} users`, 'Active Users'];
+                          if (name === 'interactions') return [`${value.toLocaleString()}`, 'Interactions'];
+                          return [value.toLocaleString(), name];
+                        }}
+                        cursor={{ fill: isDark ? 'rgba(88, 166, 255, 0.1)' : 'rgba(59, 130, 246, 0.1)' }}
+                      />
+                      <Bar 
+                        dataKey="users" 
+                        name="users"
+                        radius={[4, 4, 0, 0]}
+                      >
+                        {ideUsage.map((entry, index) => (
+                          <Cell 
+                            key={`cell-${index}`} 
+                            fill={ideColors[index % ideColors.length]}
+                          />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+                <div className="mt-4 flex flex-wrap gap-4 justify-center">
+                  {ideUsage.map((item, index) => (
+                    <div key={item.ide} className="flex items-center gap-2 text-sm">
+                      <div 
+                        className="w-3 h-3 rounded-sm" 
+                        style={{ backgroundColor: ideColors[index % ideColors.length] }}
+                      />
+                      <span className="text-gray-600 dark:text-dark-textSecondary">
+                        {item.ide}: {item.users} users, {item.interactions.toLocaleString()} interactions
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </section>

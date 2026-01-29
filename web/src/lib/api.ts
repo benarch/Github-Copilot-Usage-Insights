@@ -4,7 +4,8 @@ import type {
   ChartDataPoint, 
   StackedChartDataPoint,
   CodeGenerationStats,
-  UserUsageDetailsResponse
+  UserUsageDetailsResponse,
+  IDEUsageData
 } from '@/types';
 
 const API_BASE = '/api/usage';
@@ -47,4 +48,8 @@ export async function fetchUserDetails(
   limit: number = 50
 ): Promise<UserUsageDetailsResponse> {
   return fetchJson(`${API_BASE}/user-details?timeframe=${timeframe}&page=${page}&limit=${limit}`);
+}
+
+export async function fetchIDEUsage(timeframe: Timeframe): Promise<IDEUsageData[]> {
+  return fetchJson(`${API_BASE}/ide-usage?timeframe=${timeframe}`);
 }
