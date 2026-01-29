@@ -67,3 +67,16 @@ export interface IDEUsageData {
   users: number;
   interactions: number;
 }
+
+export interface ChatRequest {
+  message: string;
+  context?: {
+    timeframe?: Timeframe;
+  };
+}
+
+export interface ChatResponse {
+  response: string;
+  data?: any[];
+  suggestedFollowups?: string[];
+}

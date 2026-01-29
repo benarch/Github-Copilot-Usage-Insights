@@ -14,6 +14,7 @@ import {
   Menu,
   Bot
 } from 'lucide-react';
+import { ChatbotButton } from './Chatbot/ChatbotButton';
 
 // GitHub Octocat SVG component
 function GitHubLogo({ className = "w-8 h-8" }: { className?: string }) {
@@ -83,10 +84,7 @@ export function Header() {
           
           {/* Action icons */}
           <div className="flex items-center gap-1">
-            {/* Chatbot icon */}
-            <button className="p-2 hover:bg-gray-200 dark:hover:bg-dark-bgTertiary rounded-md transition-colors text-github-text dark:text-dark-text" title="Open Chatbot">
-              <Bot size={20} />
-            </button>
+            <ChatbotButton />
             
             {/* Dark/Light mode toggle */}
             <button 
