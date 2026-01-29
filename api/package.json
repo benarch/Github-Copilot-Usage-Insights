@@ -1,6 +1,7 @@
 {
   "name": "copilot-usage-api",
   "version": "1.0.0",
+  "type": "module",
   "description": "Backend API for Copilot Usage Insights",
   "main": "dist/index.js",
   "scripts": {
@@ -9,7 +10,8 @@
     "start": "node dist/index.js",
     "test": "vitest",
     "test:coverage": "vitest --coverage",
-    "db:seed": "tsx src/scripts/seed.ts"
+    "db:seed": "tsx src/scripts/seed.ts",
+    "db:ingest": "tsx src/scripts/ingest.ts"
   },
   "dependencies": {
     "better-sqlite3": "^11.0.0",

@@ -77,3 +77,67 @@ export interface StackedChartDataPoint {
   custom: number;
   inline: number;
 }
+
+// NDJSON Data Schemas for ingestion
+export const NDJSONTotalsByIdeSchema = z.object({
+  ide: z.string(),
+  code_generation_activity_count: z.number().optional().default(0),
+  code_acceptance_activity_count: z.number().optional().default(0),
+  loc_suggested_to_add_sum: z.number().optional().default(0),
+  loc_added_sum: z.number().optional().default(0),
+});
+export type NDJSONTotalsByIde = z.infer<typeof NDJSONTotalsByIdeSchema>;
+
+export const NDJSONTotalsByFeatureSchema = z.object({
+  feature: z.string(),
+  user_initiated_interaction_count: z.number().optional().default(0),
+  code_generation_activity_count: z.number().optional().default(0),
+  code_acceptance_activity_count: z.number().optional().default(0),
+});
+export type NDJSONTotalsByFeature = z.infer<typeof NDJSONTotalsByFeatureSchema>;
+
+export const NDJSONTotalsByLanguageFeatureSchema = z.object({
+  language: z.string(),
+  feature: z.string(),
+  count: z.number().optional().default(0),
+});
+export type NDJSONTotalsByLanguageFeature = z.infer<typeof NDJSONTotalsByLanguageFeatureSchema>;
+
+export const NDJSONTotalsByLanguageModelSchema = z.object({
+  language: z.string(),
+  model: z.string(),
+  count: z.number().optional().default(0),
+});
+export type NDJSONTotalsByLanguageModel = z.infer<typeof NDJSONTotalsByLanguageModelSchema>;
+
+export const NDJSONTotalsByModelFeatureSchema = z.object({
+  model: z.string(),
+  feature: z.string(),
+  count: z.number().optional().default(0),
+});
+export type NDJSONTotalsByModelFeature = z.infer<typeof NDJSONTotalsByModelFeatureSchema>;
+
+export const NDJSONRecordSchema = z.object({
+  report_start_day: z.string(),
+  report_end_day: z.string(),
+  day: z.string(),
+  enterprise_id: z.string(),
+  user_id: z.number(),
+  user_login: z.string(),
+  user_initiated_interaction_count: z.number().optional().default(0),
+  code_generation_activity_count: z.number().optional().default(0),
+  code_acceptance_activity_count: z.number().optional().default(0),
+  used_agent: z.boolean().optional().default(false),
+  used_chat: z.boolean().optional().default(false),
+  loc_suggested_to_add_sum: z.number().optional().default(0),
+  loc_suggested_to_delete_sum: z.number().optional().default(0),
+  loc_added_sum: z.number().optional().default(0),
+  loc_deleted_sum: z.number().optional().default(0),
+  totals_by_ide: z.array(NDJSONTotalsByIdeSchema).optional().default([]),
+  totals_by_feature: z.array(NDJSONTotalsByFeatureSchema).optional().default([]),
+  totals_by_language_feature: z.array(NDJSONTotalsByLanguageFeatureSchema).optional().default([]),
+  totals_by_language_model: z.array(NDJSONTotalsByLanguageModelSchema).optional().default([]),
+  totals_by_model_feature: z.array(NDJSONTotalsByModelFeatureSchema).optional().default([]),
+});
+export type NDJSONRecord = z.infer<typeof NDJSONRecordSchema>;
+
