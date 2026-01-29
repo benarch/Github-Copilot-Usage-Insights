@@ -33,3 +33,16 @@ export interface CodeGenerationStats {
   acceptanceRate: number;
   dailyData: Array<{ date: string; suggestions: number; accepted: number }>;
 }
+
+export interface ChatRequest {
+  message: string;
+  context?: {
+    timeframe?: Timeframe;
+  };
+}
+
+export interface ChatResponse {
+  response: string;
+  data?: any[];
+  suggestedFollowups?: string[];
+}

@@ -15,6 +15,7 @@ import {
   Bell,
   ChevronDown
 } from 'lucide-react';
+import { ChatbotButton } from './Chatbot/ChatbotButton';
 
 const navItems = [
   { icon: Home, label: 'Overview', href: '#' },
@@ -49,6 +50,7 @@ export function Header() {
           
           {/* Action icons */}
           <div className="flex items-center gap-1">
+            <ChatbotButton />
             <button className="p-2 hover:bg-github-bgSecondary rounded-md transition-colors flex items-center gap-1">
               <Brain size={16} />
               <ChevronDown size={12} />
