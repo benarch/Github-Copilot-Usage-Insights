@@ -7,9 +7,17 @@ build/
 
 # Database
 *.db
+*.db-shm
+*.db-wal
 *.sqlite
 *.sqlite3
 api/src/data/*.db
+api/src/data/*.db-shm
+api/src/data/*.db-wal
+
+# Ingested data files
+api/data/raw/*.json
+api/data/processed/*.json
 
 # Environment files
 .env
