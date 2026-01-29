@@ -1,0 +1,23 @@
+{
+  "name": "copilot-usage-insights",
+  "version": "1.0.0",
+  "description": "GitHub Copilot Usage Insights Dashboard",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently \"npm run dev:api\" \"npm run dev:web\"",
+    "dev:api": "cd api && npm run dev",
+    "dev:web": "cd web && npm run dev",
+    "build": "npm run build:api && npm run build:web",
+    "build:api": "cd api && npm run build",
+    "build:web": "cd web && npm run build",
+    "install:all": "npm install && cd api && npm install && cd ../web && npm install",
+    "db:seed": "cd api && npm run db:seed",
+    "test": "cd api && npm test",
+    "docker:build": "docker-compose build",
+    "docker:up": "docker-compose up -d",
+    "docker:down": "docker-compose down"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
