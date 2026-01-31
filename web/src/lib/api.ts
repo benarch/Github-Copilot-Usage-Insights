@@ -206,7 +206,7 @@ export async function fetchUsersList(page: number = 1, limit: number = 50, searc
 }
 
 export interface GlobalSearchResult {
-  type: 'person' | 'ide' | 'language' | 'model' | 'enterprise';
+  type: 'person' | 'ide' | 'language' | 'model' | 'enterprise' | 'team' | 'organization';
   id: string;
   name: string;
   description?: string;

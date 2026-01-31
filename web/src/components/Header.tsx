@@ -108,7 +108,32 @@ export function Header() {
       setIsSearching(true);
       try {
         const result = await globalSearch(searchQuery);
-        setSearchResults(result.results);
+        const apiResults = result.results;
+        
+        // Search imported teams
+        const query = searchQuery.toLowerCase();
+        const teamResults: GlobalSearchResult[] = importedTeams
+          .filter(t => t.name.toLowerCase().includes(query) || t.organization.toLowerCase().includes(query))
+          .slice(0, 5)
+          .map(t => ({
+            type: 'team' as const,
+            id: t.id,
+            name: t.name,
+            description: t.organization ? `Organization: ${t.organization} • ${t.memberCount} members` : `${t.memberCount} members`
+          }));
+        
+        // Search imported organizations
+        const orgResults: GlobalSearchResult[] = importedOrganizations
+          .filter(o => o.name.toLowerCase().includes(query))
+          .slice(0, 5)
+          .map(o => ({
+            type: 'organization' as const,
+            id: o.id,
+            name: o.name,
+            description: `${o.teamsCount} teams • ${o.memberCount} members`
+          }));
+        
+        setSearchResults([...teamResults, ...orgResults, ...apiResults]);
       } catch (error) {
         console.error('Search failed:', error);
       } finally {
@@ -116,7 +141,7 @@ export function Header() {
       }
     }, 300);
     return () => clearTimeout(timer);
-  }, [searchQuery]);
+  }, [searchQuery, importedTeams, importedOrganizations]);
 
   const handleResultClick = (result: GlobalSearchResult) => {
     switch (result.type) {
@@ -125,6 +150,12 @@ export function Header() {
         break;
       case 'enterprise':
         navigate(`/people?search=${encodeURIComponent(result.id)}`);
+        break;
+      case 'team':
+        navigate(`/teams?search=${encodeURIComponent(result.name)}`);
+        break;
+      case 'organization':
+        navigate(`/organizations?search=${encodeURIComponent(result.name)}`);
         break;
       case 'ide':
       case 'language':
@@ -142,6 +173,8 @@ export function Header() {
     switch (type) {
       case 'person': return <Users size={16} className="text-blue-500" />;
       case 'enterprise': return <Building2 size={16} className="text-purple-500" />;
+      case 'team': return <Users2 size={16} className="text-purple-500" />;
+      case 'organization': return <Building2 size={16} className="text-orange-500" />;
       case 'ide': return <Monitor size={16} className="text-green-500" />;
       case 'language': return <Code size={16} className="text-orange-500" />;
       case 'model': return <Cpu size={16} className="text-pink-500" />;
@@ -152,6 +185,8 @@ export function Header() {
     switch (type) {
       case 'person': return 'Person';
       case 'enterprise': return 'Enterprise';
+      case 'team': return 'Team';
+      case 'organization': return 'Organization';
       case 'ide': return 'IDE';
       case 'language': return 'Language';
       case 'model': return 'Model';
