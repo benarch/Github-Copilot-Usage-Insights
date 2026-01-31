@@ -205,7 +205,11 @@ export function TeamsPage() {
                       {team.name}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-dark-textSecondary whitespace-nowrap">
-                      {team.organization || '—'}
+                      {team.organization ? (
+                        <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-orange-100 text-orange-800 dark:bg-orange-900/30 dark:text-orange-300">
+                          {team.organization}
+                        </span>
+                      ) : '—'}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text whitespace-nowrap">
                       {team.memberCount}
