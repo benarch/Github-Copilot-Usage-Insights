@@ -1,5 +1,5 @@
 import { useState, useRef, useMemo } from 'react';
-import { Info, Download, Upload } from 'lucide-react';
+import { Info, Upload } from 'lucide-react';
 import { StatsCard } from '@/components/StatsCard';
 import { AreaChartCard } from '@/components/AreaChartCard';
 import { StackedBarChartCard } from '@/components/StackedBarChartCard';
@@ -8,7 +8,8 @@ import { DonutChartCard } from '@/components/DonutChartCard';
 import { MultiLineChartCard } from '@/components/MultiLineChartCard';
 import { DynamicStackedBarChart } from '@/components/DynamicStackedBarChart';
 import { TimeframeDropdown } from '@/components/TimeframeDropdown';
-import { uploadJsonFile } from '@/lib/api';
+import { ExportDropdown, convertToJSON, convertToNDJSON, convertToCSV, downloadFile, type ExportFormat } from '@/components/ExportDropdown';
+import { uploadJsonFile, fetchExportData } from '@/lib/api';
 import { useNavCounts } from '@/contexts/NavCountsContext';
 import { 
   useSummary, 
@@ -82,6 +83,7 @@ const IDE_COLORS: Record<string, string> = {
 export function CopilotUsagePage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('28');
   const [isUploading, setIsUploading] = useState(false);
+  const [isExporting, setIsExporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const { refreshCounts } = useNavCounts();
   
@@ -215,22 +217,56 @@ export function CopilotUsagePage() {
     }
   };
 
+  const handleExport = async (format: ExportFormat) => {
+    setIsExporting(true);
+    try {
+      const data = await fetchExportData();
+      if (data.length === 0) {
+        alert('No data to export');
+        return;
+      }
+      
+      const timestamp = new Date().toISOString().split('T')[0];
+      
+      if (format === 'json') {
+        const content = convertToJSON(data);
+        downloadFile(content, `copilot-usage-${timestamp}.json`, 'application/json');
+      } else if (format === 'ndjson') {
+        const content = convertToNDJSON(data);
+        downloadFile(content, `copilot-usage-${timestamp}.ndjson`, 'application/x-ndjson');
+      } else {
+        const content = convertToCSV(data);
+        downloadFile(content, `copilot-usage-${timestamp}.csv`, 'text/csv');
+      }
+    } catch (error) {
+      alert(`Export failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
   return (
     <div className="max-w-7xl">
       {/* Page Header */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-2">
           <h1 className="text-xl font-semibold text-github-text dark:text-dark-text">Copilot IDE usage</h1>
-          <button className="text-github-textSecondary dark:text-dark-textSecondary hover:text-github-text dark:hover:text-dark-text transition-colors">
-            <Info size={16} />
-          </button>
+          <div className="relative group">
+            <button className="text-github-textSecondary dark:text-dark-textSecondary hover:text-github-text dark:hover:text-dark-text transition-colors">
+              <Info size={16} />
+            </button>
+            <div className="absolute left-0 top-full mt-2 w-80 p-4 bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+              <h3 className="font-semibold text-github-text dark:text-dark-text mb-2">Copilot IDE Usage Dashboard</h3>
+              <p className="text-sm text-github-textSecondary dark:text-dark-textSecondary">Track GitHub Copilot adoption metrics including active users, chat interactions, model usage distribution, and IDE-specific statistics. Monitor how your team uses Copilot across different development tools.</p>
+            </div>
+          </div>
         </div>
         
         <div className="flex items-center gap-3">
           <span className="px-2 py-0.5 bg-primary-50 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 text-xs font-medium rounded-full border border-primary-200 dark:border-primary-800">
             Preview
           </span>
-          <a href="#" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
+          <a href="https://github.com/benarch/Github-Copilot-Usage-Extended-Insights/issues" target="_blank" rel="noopener noreferrer" className="text-sm text-primary-600 dark:text-primary-400 hover:underline">
             Give feedback
           </a>
           <TimeframeDropdown value={timeframe} onChange={setTimeframe} />
@@ -249,9 +285,7 @@ export function CopilotUsagePage() {
           >
             <Upload size={16} className="text-github-textSecondary dark:text-dark-textSecondary" />
           </button>
-          <button className="p-2 hover:bg-github-bgSecondary dark:hover:bg-dark-bgTertiary border border-github-border dark:border-dark-border rounded-md transition-colors">
-            <Download size={16} className="text-github-textSecondary dark:text-dark-textSecondary" />
-          </button>
+          <ExportDropdown onExport={handleExport} isExporting={isExporting} />
         </div>
       </div>
 

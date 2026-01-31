@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { useUserDetails } from '@/hooks/useUsageData';
 import { Timeframe } from '@/types';
-import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react';
 
 function formatDateRange(days: number): string {
   const end = new Date();
@@ -17,11 +18,25 @@ function formatDateRange(days: number): string {
 }
 
 export function TableViewPage() {
+  const [searchParams, setSearchParams] = useSearchParams();
   const [timeframe, setTimeframe] = useState<Timeframe>('7');
   const [page, setPage] = useState(1);
+  const initialSearch = searchParams.get('search') || '';
+  const [searchQuery, setSearchQuery] = useState(initialSearch);
+  const [searchInput, setSearchInput] = useState(initialSearch);
   const limit = 25;
 
-  const { data, isLoading, error } = useUserDetails(timeframe, page, limit);
+  // Sync with URL search params
+  useEffect(() => {
+    const urlSearch = searchParams.get('search') || '';
+    if (urlSearch !== searchQuery) {
+      setSearchQuery(urlSearch);
+      setSearchInput(urlSearch);
+      setPage(1);
+    }
+  }, [searchParams]);
+
+  const { data, isLoading, error } = useUserDetails(timeframe, page, limit, searchQuery);
 
   const timeframeOptions: { value: Timeframe; label: string }[] = [
     { value: '7', label: `Last 7 days (${formatDateRange(7)})` },
@@ -31,15 +46,29 @@ export function TableViewPage() {
 
   const totalPages = data ? Math.ceil(data.total / limit) : 0;
 
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    setSearchQuery(searchInput);
+    setSearchParams(searchInput ? { search: searchInput } : {});
+    setPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setSearchInput('');
+    setSearchQuery('');
+    setSearchParams({});
+    setPage(1);
+  };
+
   return (
     <div className="min-h-screen bg-white dark:bg-dark-bg">
       <div className="max-w-[1600px] mx-auto px-6 py-8">
         {/* Header */}
-        <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-semibold text-gray-900 dark:text-dark-text">
-            Detailed Report
-          </h1>
-          <div className="flex items-center gap-4">
+        <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-2xl font-semibold text-gray-900 dark:text-dark-text">
+              Detailed Report
+            </h1>
             <select
               value={timeframe}
               onChange={(e) => {
@@ -55,12 +84,45 @@ export function TableViewPage() {
               ))}
             </select>
           </div>
+          
+          {/* Search Box */}
+          <form onSubmit={handleSearch} className="flex items-center gap-2">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+              <input
+                type="text"
+                value={searchInput}
+                onChange={(e) => setSearchInput(e.target.value)}
+                placeholder="Search by user, enterprise ID, or user ID..."
+                className="w-full pl-10 pr-4 py-2 rounded-md border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bgSecondary text-gray-900 dark:text-dark-text placeholder-gray-500 dark:placeholder-dark-textSecondary focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              />
+            </div>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+            >
+              Search
+            </button>
+            {searchQuery && (
+              <button
+                type="button"
+                onClick={handleClearSearch}
+                className="px-4 py-2 bg-gray-200 dark:bg-dark-bgTertiary text-gray-700 dark:text-dark-text rounded-md hover:bg-gray-300 dark:hover:bg-dark-border transition-colors"
+              >
+                Clear
+              </button>
+            )}
+          </form>
         </div>
 
         {/* Stats Summary */}
         {data && (
           <div className="mb-4 text-sm text-gray-600 dark:text-dark-textSecondary">
-            Showing {((page - 1) * limit) + 1} - {Math.min(page * limit, data.total)} of {data.total} records
+            {searchQuery ? (
+              <span>Found {data.total} {data.total === 1 ? 'record' : 'records'} matching "{searchQuery}"</span>
+            ) : (
+              <span>Showing {((page - 1) * limit) + 1} - {Math.min(page * limit, data.total)} of {data.total} records</span>
+            )}
           </div>
         )}
 

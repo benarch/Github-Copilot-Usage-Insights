@@ -44,10 +44,10 @@ export function useCodeGeneration(timeframe: Timeframe) {
   });
 }
 
-export function useUserDetails(timeframe: Timeframe, page: number, limit: number) {
+export function useUserDetails(timeframe: Timeframe, page: number, limit: number, search: string = '') {
   return useQuery({
-    queryKey: ['userDetails', timeframe, page, limit],
-    queryFn: () => api.fetchUserDetails(timeframe, page, limit),
+    queryKey: ['userDetails', timeframe, page, limit, search],
+    queryFn: () => api.fetchUserDetails(timeframe, page, limit, search),
   });
 }
 

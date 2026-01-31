@@ -74,9 +74,11 @@ export async function fetchCodeGeneration(timeframe: Timeframe): Promise<CodeGen
 export async function fetchUserDetails(
   timeframe: Timeframe, 
   page: number = 1, 
-  limit: number = 50
+  limit: number = 50,
+  search: string = ''
 ): Promise<UserUsageDetailsResponse> {
-  return fetchJson(`${API_BASE}/user-details?timeframe=${timeframe}&page=${page}&limit=${limit}`);
+  const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+  return fetchJson(`${API_BASE}/user-details?timeframe=${timeframe}&page=${page}&limit=${limit}${searchParam}`);
 }
 
 export async function fetchIDEUsage(timeframe: Timeframe): Promise<IDEUsageData[]> {
@@ -226,4 +228,37 @@ export interface NavCounts {
 
 export async function fetchNavCounts(): Promise<NavCounts> {
   return fetchJson(`${API_BASE}/counts`);
+}
+
+// Export data interface matching the requested fields
+export interface ExportDataItem {
+  report_start_day: string;
+  report_end_day: string;
+  day: string;
+  enterprise_id: string;
+  user_id: number;
+  user_login: string;
+  user_initiated_interaction_count: number;
+  code_generation_activity_count: number;
+  code_acceptance_activity_count: number;
+  used_agent: number;
+  used_chat: number;
+  loc_suggested_to_add_sum: number;
+  loc_suggested_to_delete_sum: number;
+  loc_added_sum: number;
+  loc_deleted_sum: number;
+  primary_ide: string | null;
+  primary_ide_version: string | null;
+  primary_plugin_version: string | null;
+}
+
+// Export data - fetch all records with complete fields
+export async function fetchExportData(): Promise<ExportDataItem[]> {
+  return fetchJson(`${API_BASE}/export`);
+}
+
+// Legacy export function (deprecated - use fetchExportData instead)
+export async function fetchAllUsersForExport(): Promise<UserListItem[]> {
+  const response = await fetchUsersList(1, 10000, ''); // Large limit to get all
+  return response.data;
 }

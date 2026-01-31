@@ -215,7 +215,8 @@ router.get('/user-details', async (req: Request, res: Response) => {
     const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
-    const data = await usageController.getUserUsageDetails(timeframe, page, limit);
+    const search = (req.query.search as string) || '';
+    const data = await usageController.getUserUsageDetails(timeframe, page, limit, search);
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Invalid parameters' });
@@ -666,6 +667,25 @@ router.get('/counts', (req: Request, res: Response) => {
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Failed to get counts' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/export:
+ *   get:
+ *     summary: Get all user usage data for export
+ *     tags: [Usage]
+ *     responses:
+ *       200:
+ *         description: All user usage data with specified fields
+ */
+router.get('/export', (req: Request, res: Response) => {
+  try {
+    const data = usageController.getExportData();
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to get export data' });
   }
 });
 

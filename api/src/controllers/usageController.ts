@@ -294,7 +294,8 @@ export async function getCodeGenerationStats(timeframe: Timeframe): Promise<{
 export async function getUserUsageDetails(
   timeframe: Timeframe,
   page: number = 1,
-  limit: number = 50
+  limit: number = 50,
+  search: string = ''
 ): Promise<UserUsageDetailsResponse> {
   const days = parseInt(timeframe);
   const { startDate, endDate } = getDateRange(days);
@@ -302,17 +303,27 @@ export async function getUserUsageDetails(
   if (await shouldUseDirectJson()) {
     const records = await jsonReader.getAllRecords();
     const filtered = jsonReader.filterByDateRange(records, startDate, endDate);
-    return jsonReader.getUserDetailsFromRecords(filtered, page, limit);
+    // Apply search filter if provided
+    const searchFiltered = search 
+      ? filtered.filter(r => 
+          r.user_login.toLowerCase().includes(search.toLowerCase()) ||
+          r.enterprise_id.toLowerCase().includes(search.toLowerCase()) ||
+          r.user_id.toString().includes(search)
+        )
+      : filtered;
+    return jsonReader.getUserDetailsFromRecords(searchFiltered, page, limit);
   }
 
   const db = getDatabase();
   const offset = (page - 1) * limit;
+  const searchPattern = search ? `%${search}%` : '%';
 
   // Get total count
   const countRow = db.prepare(`
     SELECT COUNT(*) as total FROM user_usage_details 
     WHERE day BETWEEN ? AND ?
-  `).get(startDate, endDate) as { total: number };
+    AND (user_login LIKE ? OR enterprise_id LIKE ? OR CAST(user_id AS TEXT) LIKE ?)
+  `).get(startDate, endDate, searchPattern, searchPattern, searchPattern) as { total: number };
 
   // Get paginated data
   const rows = db.prepare(`
@@ -323,9 +334,10 @@ export async function getUserUsageDetails(
       loc_added_sum, loc_deleted_sum, primary_ide, primary_ide_version, primary_plugin_version
     FROM user_usage_details 
     WHERE day BETWEEN ? AND ?
+    AND (user_login LIKE ? OR enterprise_id LIKE ? OR CAST(user_id AS TEXT) LIKE ?)
     ORDER BY day DESC, user_login ASC
     LIMIT ? OFFSET ?
-  `).all(startDate, endDate, limit, offset) as Array<{
+  `).all(startDate, endDate, searchPattern, searchPattern, searchPattern, limit, offset) as Array<{
     report_start_day: string;
     report_end_day: string;
     day: string;
@@ -1470,4 +1482,57 @@ export function getCounts(): { peopleCount: number; teamsCount: number } {
     peopleCount: result?.peopleCount || 0,
     teamsCount: result?.teamsCount || 0
   };
+}
+
+// Export data interface for download
+export interface ExportDataItem {
+  report_start_day: string;
+  report_end_day: string;
+  day: string;
+  enterprise_id: string;
+  user_id: number;
+  user_login: string;
+  user_initiated_interaction_count: number;
+  code_generation_activity_count: number;
+  code_acceptance_activity_count: number;
+  used_agent: number;
+  used_chat: number;
+  loc_suggested_to_add_sum: number;
+  loc_suggested_to_delete_sum: number;
+  loc_added_sum: number;
+  loc_deleted_sum: number;
+  primary_ide: string | null;
+  primary_ide_version: string | null;
+  primary_plugin_version: string | null;
+}
+
+// Get all data for export with specified fields
+export function getExportData(): ExportDataItem[] {
+  const db = getDatabase();
+  
+  const rows = db.prepare(`
+    SELECT 
+      report_start_day,
+      report_end_day,
+      day,
+      enterprise_id,
+      user_id,
+      user_login,
+      user_initiated_interaction_count,
+      code_generation_activity_count,
+      code_acceptance_activity_count,
+      used_agent,
+      used_chat,
+      loc_suggested_to_add_sum,
+      loc_suggested_to_delete_sum,
+      loc_added_sum,
+      loc_deleted_sum,
+      primary_ide,
+      primary_ide_version,
+      primary_plugin_version
+    FROM user_usage_details
+    ORDER BY day DESC, user_login ASC
+  `).all() as ExportDataItem[];
+  
+  return rows;
 }

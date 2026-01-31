@@ -43,8 +43,39 @@ export function SummaryReportPage() {
 
   const isLoading = summaryLoading || codeGenLoading || ideLoading;
 
+  // Target IDEs to display (with case-insensitive matching patterns)
+  const targetIDEs = [
+    { display: 'VS Code', patterns: ['vscode', 'vs code', 'visual studio code'] },
+    { display: 'Visual Studio', patterns: ['visual studio', 'visualstudio'] },
+    { display: 'JetBrains IDE', patterns: ['jetbrains', 'rider', 'webstorm', 'pycharm', 'phpstorm', 'rubymine', 'goland', 'clion', 'datagrip', 'appcode'] },
+    { display: 'IntelliJ', patterns: ['intellij'] },
+    { display: 'Neovim', patterns: ['neovim', 'nvim'] },
+    { display: 'Eclipse', patterns: ['eclipse'] },
+    { display: 'Xcode', patterns: ['xcode'] },
+  ];
+
+  // Process IDE usage data to match target IDEs
+  const processedIDEUsage = targetIDEs.map(target => {
+    // Find matching IDEs from the API data
+    const matchingData = ideUsage?.filter(item => 
+      target.patterns.some(pattern => 
+        item.ide.toLowerCase().includes(pattern.toLowerCase())
+      )
+    ) || [];
+    
+    // Sum up users and interactions from all matching entries
+    const totalUsers = matchingData.reduce((sum, item) => sum + item.users, 0);
+    const totalInteractions = matchingData.reduce((sum, item) => sum + item.interactions, 0);
+    
+    return {
+      ide: target.display,
+      users: totalUsers,
+      interactions: totalInteractions,
+    };
+  }).filter(item => item.users > 0); // Only show IDEs with users
+
   // IDE bar colors
-  const ideColors = ['#58a6ff', '#3fb950', '#a371f7', '#d29922', '#f85149', '#8b949e'];
+  const ideColors = ['#58a6ff', '#3fb950', '#a371f7', '#d29922', '#f85149', '#8b949e', '#f778ba'];
 
   const timeframeOptions: { value: Timeframe; label: string; range: string }[] = [
     { value: '7', label: 'Last 7 days', range: formatDateRange(7).label },
@@ -224,7 +255,7 @@ export function SummaryReportPage() {
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart
-                      data={ideUsage}
+                      data={processedIDEUsage}
                       margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
                       barCategoryGap="20%"
                     >
@@ -280,7 +311,7 @@ export function SummaryReportPage() {
                         name="users"
                         radius={[4, 4, 0, 0]}
                       >
-                        {ideUsage.map((entry, index) => (
+                        {processedIDEUsage.map((entry, index) => (
                           <Cell 
                             key={`cell-${index}`} 
                             fill={ideColors[index % ideColors.length]}
@@ -291,7 +322,7 @@ export function SummaryReportPage() {
                   </ResponsiveContainer>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-4 justify-center">
-                  {ideUsage.map((item, index) => (
+                  {processedIDEUsage.map((item, index) => (
                     <div key={item.ide} className="flex items-center gap-2 text-sm">
                       <div 
                         className="w-3 h-3 rounded-sm" 
