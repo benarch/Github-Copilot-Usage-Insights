@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useUsersList } from '@/hooks/useUsageData';
 import { ChevronLeft, ChevronRight, Loader2, Users, Search } from 'lucide-react';
+import { useImportData } from '@/contexts/ImportDataContext';
 
 export function PeoplePage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -9,7 +10,13 @@ export function PeoplePage() {
   const initialSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [searchInput, setSearchInput] = useState(initialSearch);
+  const { users: importedUsers } = useImportData();
   const limit = 25;
+
+  // Create a map of user login to team info from imported data
+  const userTeamsMap = new Map(
+    importedUsers.map(u => [u.login, { teams: u.teams, team_count: u.team_count }])
+  );
 
   // Sync with URL search params
   useEffect(() => {
@@ -131,6 +138,12 @@ export function PeoplePage() {
                     User Login
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
+                    Team Count
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
+                    Team Membership
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
                     IDE
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
@@ -155,6 +168,20 @@ export function PeoplePage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text whitespace-nowrap font-medium">
                       {user.user_login}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text whitespace-nowrap text-center">
+                      {userTeamsMap.get(user.user_login)?.team_count ?? '—'}
+                    </td>
+                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-dark-textSecondary max-w-xs">
+                      <div className="flex flex-wrap gap-1">
+                        {userTeamsMap.get(user.user_login)?.teams?.length ? (
+                          userTeamsMap.get(user.user_login)!.teams.map((team, i) => (
+                            <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
+                              {team}
+                            </span>
+                          ))
+                        ) : '—'}
+                      </div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text whitespace-nowrap">
                       {user.primary_ide || '—'}
