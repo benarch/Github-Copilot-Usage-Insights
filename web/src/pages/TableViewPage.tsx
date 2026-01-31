@@ -1,8 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useUserDetails } from '@/hooks/useUsageData';
 import { Timeframe } from '@/types';
-import { ChevronLeft, ChevronRight, Loader2, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Loader2, Search, Filter } from 'lucide-react';
+
+type InteractionMode = 'all' | 'chat' | 'agent';
+type IDEFilter = 'all' | 'vscode' | 'visualstudio' | 'intellij' | 'eclipse' | 'xcode';
+type SortOrder = 'none' | 'asc' | 'desc';
 
 function formatDateRange(days: number): string {
   const end = new Date();
@@ -24,7 +28,12 @@ export function TableViewPage() {
   const initialSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [searchInput, setSearchInput] = useState(initialSearch);
-  const limit = 25;
+  const [limit, setLimit] = useState(25);
+  
+  // Filter states
+  const [interactionMode, setInteractionMode] = useState<InteractionMode>('all');
+  const [ideFilter, setIDEFilter] = useState<IDEFilter>('all');
+  const [sortOrder, setSortOrder] = useState<SortOrder>('none');
 
   // Sync with URL search params
   useEffect(() => {
@@ -36,7 +45,8 @@ export function TableViewPage() {
     }
   }, [searchParams]);
 
-  const { data, isLoading, error } = useUserDetails(timeframe, page, limit, searchQuery);
+  // Fetch more data to allow client-side filtering
+  const { data, isLoading, error } = useUserDetails(timeframe, 1, 1000, searchQuery);
 
   const timeframeOptions: { value: Timeframe; label: string }[] = [
     { value: '7', label: `Last 7 days (${formatDateRange(7)})` },
@@ -44,7 +54,87 @@ export function TableViewPage() {
     { value: '28', label: `Last 28 days (${formatDateRange(28)})` },
   ];
 
-  const totalPages = data ? Math.ceil(data.total / limit) : 0;
+  const interactionModeOptions = [
+    { value: 'all', label: 'All Modes' },
+    { value: 'chat', label: 'Ask (Chat)' },
+    { value: 'agent', label: 'Agent' },
+  ];
+
+  const ideOptions = [
+    { value: 'all', label: 'All IDEs' },
+    { value: 'vscode', label: 'VS Code' },
+    { value: 'visualstudio', label: 'Visual Studio' },
+    { value: 'intellij', label: 'IntelliJ' },
+    { value: 'eclipse', label: 'Eclipse' },
+    { value: 'xcode', label: 'Xcode' },
+  ];
+
+  const sortOptions = [
+    { value: 'none', label: 'No Sorting' },
+    { value: 'asc', label: 'Acceptances (Low → High)' },
+    { value: 'desc', label: 'Acceptances (High → Low)' },
+  ];
+
+  const limitOptions = [25, 50, 75, 100];
+
+  // Filter and sort data
+  const filteredData = useMemo(() => {
+    if (!data?.data) return [];
+    
+    let result = [...data.data];
+    
+    // Filter by interaction mode
+    if (interactionMode === 'chat') {
+      result = result.filter(row => Boolean(row.used_chat));
+    } else if (interactionMode === 'agent') {
+      result = result.filter(row => Boolean(row.used_agent));
+    }
+    
+    // Filter by IDE
+    if (ideFilter !== 'all') {
+      result = result.filter(row => {
+        const ide = (row.primary_ide || '').toLowerCase();
+        switch (ideFilter) {
+          case 'vscode':
+            return ide.includes('vscode') || ide.includes('visual studio code');
+          case 'visualstudio':
+            // Match 'visualstudio' (no space) or 'visual studio' (with space), but exclude 'code'
+            return (ide === 'visualstudio' || (ide.includes('visual studio') && !ide.includes('code')));
+          case 'intellij':
+            return ide.includes('intellij');
+          case 'eclipse':
+            return ide.includes('eclipse');
+          case 'xcode':
+            return ide.includes('xcode');
+          default:
+            return true;
+        }
+      });
+    }
+    
+    // Sort by acceptance count
+    if (sortOrder !== 'none') {
+      result.sort((a, b) => {
+        const countA = Number(a.code_acceptance_activity_count) || 0;
+        const countB = Number(b.code_acceptance_activity_count) || 0;
+        if (sortOrder === 'asc') {
+          return countA - countB;
+        } else {
+          return countB - countA;
+        }
+      });
+    }
+    
+    return result;
+  }, [data, interactionMode, ideFilter, sortOrder]);
+
+  // Paginate filtered data
+  const paginatedData = useMemo(() => {
+    const start = (page - 1) * limit;
+    return filteredData.slice(start, start + limit);
+  }, [filteredData, page, limit]);
+
+  const totalPages = Math.ceil(filteredData.length / limit);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +147,10 @@ export function TableViewPage() {
     setSearchInput('');
     setSearchQuery('');
     setSearchParams({});
+    setPage(1);
+  };
+
+  const handleFilterChange = () => {
     setPage(1);
   };
 
@@ -86,7 +180,7 @@ export function TableViewPage() {
           </div>
           
           {/* Search Box */}
-          <form onSubmit={handleSearch} className="flex items-center gap-2">
+          <form onSubmit={handleSearch} className="flex items-center gap-2 mb-4">
             <div className="relative flex-1 max-w-md">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
               <input
@@ -113,15 +207,79 @@ export function TableViewPage() {
               </button>
             )}
           </form>
+
+          {/* Filter Controls */}
+          <div className="flex flex-wrap items-center gap-3 p-4 bg-gray-50 dark:bg-dark-bgSecondary rounded-lg border border-gray-200 dark:border-dark-border">
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-500 dark:text-dark-textSecondary" />
+              <span className="text-sm font-medium text-gray-700 dark:text-dark-text">Filters:</span>
+            </div>
+            
+            {/* Interaction Mode */}
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-gray-500 dark:text-dark-textSecondary">Mode:</label>
+              <select
+                value={interactionMode}
+                onChange={(e) => { setInteractionMode(e.target.value as InteractionMode); handleFilterChange(); }}
+                className="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg text-gray-900 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {interactionModeOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* IDE Filter */}
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-gray-500 dark:text-dark-textSecondary">IDE:</label>
+              <select
+                value={ideFilter}
+                onChange={(e) => { setIDEFilter(e.target.value as IDEFilter); handleFilterChange(); }}
+                className="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg text-gray-900 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {ideOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Sort Order */}
+            <div className="flex items-center gap-2">
+              <label className="text-xs text-gray-500 dark:text-dark-textSecondary">Sort:</label>
+              <select
+                value={sortOrder}
+                onChange={(e) => { setSortOrder(e.target.value as SortOrder); handleFilterChange(); }}
+                className="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg text-gray-900 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {sortOptions.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Rows Per Page */}
+            <div className="flex items-center gap-2 ml-auto">
+              <label className="text-xs text-gray-500 dark:text-dark-textSecondary">Per page:</label>
+              <select
+                value={limit}
+                onChange={(e) => { setLimit(parseInt(e.target.value)); setPage(1); }}
+                className="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-dark-border bg-white dark:bg-dark-bg text-gray-900 dark:text-dark-text focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                {limitOptions.map((opt) => (
+                  <option key={opt} value={opt}>{opt}</option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Stats Summary */}
         {data && (
           <div className="mb-4 text-sm text-gray-600 dark:text-dark-textSecondary">
             {searchQuery ? (
-              <span>Found {data.total} {data.total === 1 ? 'record' : 'records'} matching "{searchQuery}"</span>
+              <span>Found {filteredData.length} {filteredData.length === 1 ? 'record' : 'records'} matching "{searchQuery}"</span>
             ) : (
-              <span>Showing {((page - 1) * limit) + 1} - {Math.min(page * limit, data.total)} of {data.total} records</span>
+              <span>Showing {((page - 1) * limit) + 1} - {Math.min(page * limit, filteredData.length)} of {filteredData.length} records {filteredData.length !== data.total && `(filtered from ${data.total})`}</span>
             )}
           </div>
         )}
@@ -203,7 +361,7 @@ export function TableViewPage() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-dark-bg divide-y divide-gray-200 dark:divide-dark-border">
-                {data.data.map((row, idx) => (
+                {paginatedData.map((row, idx) => (
                   <tr 
                     key={`${row.user_id}-${row.day}-${idx}`}
                     className="hover:bg-gray-50 dark:hover:bg-dark-bgSecondary transition-colors"

@@ -1,0 +1,6 @@
+team_id,team_name,user_id,user_login,user_name,role
+1001,Engineering,11111111,alice-dev,Alice Developer,member
+1002,Frontend,11111111,alice-dev,Alice Developer,member
+1001,Engineering,22222222,bob-engineer,Bob Engineer,member
+1003,Backend,22222222,bob-engineer,Bob Engineer,member
+1004,Design,33333333,carol-designer,Carol Designer,member
