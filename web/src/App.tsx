@@ -7,6 +7,7 @@ import { TableViewPage } from '@/pages/TableViewPage';
 import { SummaryReportPage } from '@/pages/SummaryReportPage';
 import { PeoplePage } from '@/pages/PeoplePage';
 import { TeamsPage } from '@/pages/TeamsPage';
+import { UsersInTeamsPage } from '@/pages/UsersInTeamsPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NavCountsProvider } from '@/contexts/NavCountsContext';
@@ -26,6 +27,7 @@ function App() {
             <Route path="/overview" element={<OverviewPage />} />
             <Route path="/organizations" element={<OrganizationsPage />} />
             <Route path="/teams" element={<TeamsPage />} />
+            <Route path="/teams/users" element={<UsersInTeamsPage />} />
             <Route path="/people" element={<PeoplePage />} />
             <Route path="/insights/copilot-usage" element={<CopilotUsagePage />} />
             <Route path="/insights/code-generation" element={<CodeGenerationPage />} />
