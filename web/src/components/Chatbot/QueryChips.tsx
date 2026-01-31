@@ -4,12 +4,12 @@ interface QueryChipsProps {
 }
 
 const SUGGESTED_QUERIES = [
-  'Top 10 active users this week',
+  'Top 10 users',
+  'How many users?',
   'Most used IDEs',
-  'Show agent adoption statistics',
+  'Show language statistics',
   'What models are being used?',
-  'Show usage trends',
-  'Show daily usage summary',
+  'List all users',
 ];
 
 export function QueryChips({ onQuerySelect, disabled }: QueryChipsProps) {

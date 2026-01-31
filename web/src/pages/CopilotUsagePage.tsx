@@ -9,6 +9,7 @@ import { MultiLineChartCard } from '@/components/MultiLineChartCard';
 import { DynamicStackedBarChart } from '@/components/DynamicStackedBarChart';
 import { TimeframeDropdown } from '@/components/TimeframeDropdown';
 import { uploadJsonFile } from '@/lib/api';
+import { useNavCounts } from '@/contexts/NavCountsContext';
 import { 
   useSummary, 
   useDailyActiveUsers, 
@@ -82,6 +83,7 @@ export function CopilotUsagePage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('28');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { refreshCounts } = useNavCounts();
   
   const { data: summary, isLoading: summaryLoading, refetch: refetchSummary } = useSummary(timeframe);
   const { data: dailyUsers, isLoading: dailyLoading, refetch: refetchDaily } = useDailyActiveUsers(timeframe);
@@ -202,6 +204,7 @@ export function CopilotUsagePage() {
       refetchCompletions();
       refetchAcceptance();
       refetchIdeWeekly();
+      refreshCounts();
     } catch (error) {
       alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {

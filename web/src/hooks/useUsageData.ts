@@ -162,3 +162,10 @@ export function useIDEWeeklyActiveUsers(timeframe: Timeframe) {
     queryFn: () => api.fetchIDEWeeklyActiveUsers(timeframe),
   });
 }
+
+export function useUsersList(page: number = 1, limit: number = 50, search: string = '') {
+  return useQuery({
+    queryKey: ['usersList', page, limit, search],
+    queryFn: () => api.fetchUsersList(page, limit, search),
+  });
+}

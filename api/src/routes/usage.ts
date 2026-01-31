@@ -580,4 +580,93 @@ router.delete('/clear', (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @openapi
+ * /api/usage/users:
+ *   get:
+ *     summary: Get list of unique users
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: page
+ *         schema:
+ *           type: integer
+ *           default: 1
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 50
+ *       - in: query
+ *         name: search
+ *         schema:
+ *           type: string
+ *         description: Search by user login, enterprise ID, or user ID
+ *     responses:
+ *       200:
+ *         description: Users list with pagination
+ */
+router.get('/users', (req: Request, res: Response) => {
+  try {
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 50;
+    const search = (req.query.search as string) || '';
+    const data = usageController.getUsersList(page, limit, search);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to fetch users' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/search:
+ *   get:
+ *     summary: Global search across all data types
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: q
+ *         schema:
+ *           type: string
+ *         description: Search query
+ *       - in: query
+ *         name: limit
+ *         schema:
+ *           type: integer
+ *           default: 20
+ *     responses:
+ *       200:
+ *         description: Search results grouped by type
+ */
+router.get('/search', (req: Request, res: Response) => {
+  try {
+    const query = (req.query.q as string) || '';
+    const limit = parseInt(req.query.limit as string) || 20;
+    const data = usageController.globalSearch(query, limit);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Search failed' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/counts:
+ *   get:
+ *     summary: Get counts for navigation tabs
+ *     tags: [Usage]
+ *     responses:
+ *       200:
+ *         description: People and teams counts
+ */
+router.get('/counts', (req: Request, res: Response) => {
+  try {
+    const data = usageController.getCounts();
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Failed to get counts' });
+  }
+});
+
 export default router;

@@ -19,12 +19,14 @@ import {
   useAgentCodeChangesByLanguage
 } from '@/hooks/useUsageData';
 import { uploadJsonFile } from '@/lib/api';
+import { useNavCounts } from '@/contexts/NavCountsContext';
 import type { Timeframe } from '@/types';
 
 export function CodeGenerationPage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('28');
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const { refreshCounts } = useNavCounts();
   const { data: codeGenStats, isLoading, refetch } = useCodeGeneration(timeframe);
   const { data: codeCompletions, isLoading: completionsLoading, refetch: refetchCompletions } = useCodeCompletions(timeframe);
   const { data: acceptanceRate, isLoading: acceptanceLoading, refetch: refetchAcceptance } = useAcceptanceRate(timeframe);
@@ -57,6 +59,7 @@ export function CodeGenerationPage() {
       refetch();
       refetchCompletions();
       refetchAcceptance();
+      refreshCounts();
     } catch (error) {
       alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {

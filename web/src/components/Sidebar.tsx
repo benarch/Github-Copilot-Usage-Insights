@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Code2, FileText, Table } from 'lucide-react';
+import { BarChart3, Code2, FileText, Table, Users } from 'lucide-react';
 
 const insightsSidebarItems = [
   { icon: BarChart3, label: 'Copilot usage', href: '/insights/copilot-usage' },
@@ -11,16 +11,30 @@ const tableViewSidebarItems = [
   { icon: Table, label: 'Detailed Report', href: '/table-view/detailed' },
 ];
 
+const peopleSidebarItems = [
+  { icon: Users, label: 'All Members', href: '/people' },
+];
+
 export function Sidebar() {
   const location = useLocation();
   
   // Determine which sidebar to show based on current route
   const isTableView = location.pathname.startsWith('/table-view');
-  const sidebarItems = isTableView ? tableViewSidebarItems : insightsSidebarItems;
-  const sectionTitle = isTableView ? 'Reports' : 'Insights';
+  const isPeople = location.pathname === '/people';
+  
+  let sidebarItems = insightsSidebarItems;
+  let sectionTitle = 'Insights';
+  
+  if (isTableView) {
+    sidebarItems = tableViewSidebarItems;
+    sectionTitle = 'Reports';
+  } else if (isPeople) {
+    sidebarItems = peopleSidebarItems;
+    sectionTitle = 'People';
+  }
 
   return (
-    <aside className="w-56 bg-white dark:bg-dark-bgSecondary border-r border-github-border dark:border-dark-border min-h-[calc(100vh-105px)] transition-colors duration-200">
+    <aside className="w-56 flex-shrink-0 bg-white dark:bg-dark-bgSecondary border-r border-github-border dark:border-dark-border min-h-[calc(100vh-105px)] transition-colors duration-200">
       <div className="p-4">
         <h2 className="text-sm font-semibold text-github-text dark:text-dark-text mb-3">{sectionTitle}</h2>
         <nav className="space-y-1">

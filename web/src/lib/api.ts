@@ -160,6 +160,19 @@ export async function fetchAgentCodeChangesByLanguage(timeframe: Timeframe): Pro
   return fetchJson(`${API_BASE}/agent-code-changes-by-language?timeframe=${timeframe}`);
 }
 
+export async function clearAllData(): Promise<{ success: boolean; message: string }> {
+  const response = await fetch(`${API_BASE}/clear`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({ message: 'Failed to clear data' }));
+    throw new Error(error.message || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
+}
+
 export interface IDEWeeklyActiveUsers {
   week_start: string;
   ide: string;
@@ -168,4 +181,49 @@ export interface IDEWeeklyActiveUsers {
 
 export async function fetchIDEWeeklyActiveUsers(timeframe: Timeframe): Promise<IDEWeeklyActiveUsers[]> {
   return fetchJson(`${API_BASE}/ide-weekly-active-users?timeframe=${timeframe}`);
+}
+
+export interface UserListItem {
+  enterprise_id: string;
+  user_id: number;
+  user_login: string;
+  primary_ide: string | null;
+  primary_ide_version: string | null;
+}
+
+export interface UserListResponse {
+  data: UserListItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export async function fetchUsersList(page: number = 1, limit: number = 50, search: string = ''): Promise<UserListResponse> {
+  const searchParam = search ? `&search=${encodeURIComponent(search)}` : '';
+  return fetchJson(`${API_BASE}/users?page=${page}&limit=${limit}${searchParam}`);
+}
+
+export interface GlobalSearchResult {
+  type: 'person' | 'ide' | 'language' | 'model' | 'enterprise';
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface GlobalSearchResponse {
+  results: GlobalSearchResult[];
+  query: string;
+}
+
+export async function globalSearch(query: string, limit: number = 20): Promise<GlobalSearchResponse> {
+  return fetchJson(`${API_BASE}/search?q=${encodeURIComponent(query)}&limit=${limit}`);
+}
+
+export interface NavCounts {
+  peopleCount: number;
+  teamsCount: number;
+}
+
+export async function fetchNavCounts(): Promise<NavCounts> {
+  return fetchJson(`${API_BASE}/counts`);
 }

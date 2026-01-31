@@ -1,4 +1,5 @@
-import { Link, useLocation } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useTheme } from '@/contexts/ThemeContext';
 import { 
   Home, 
@@ -12,9 +13,17 @@ import {
   Sun,
   Moon,
   Menu,
-  Bot
+  Bot,
+  Trash2,
+  Loader2,
+  Monitor,
+  Code,
+  Cpu,
+  X
 } from 'lucide-react';
 import { ChatbotButton } from './Chatbot/ChatbotButton';
+import { clearAllData, globalSearch, GlobalSearchResult } from '@/lib/api';
+import { useNavCounts } from '@/contexts/NavCountsContext';
 
 // GitHub Octocat SVG component
 function GitHubLogo({ className = "w-8 h-8" }: { className?: string }) {
@@ -29,17 +38,129 @@ const navItems = [
   { icon: Home, label: 'Overview', href: '/overview' },
   { icon: Building2, label: 'Organizations', href: '#' },
   { icon: Users2, label: 'Teams', href: '#' },
-  { icon: Users, label: 'People', href: '#' },
+  { icon: Users, label: 'People', href: '/people' },
   { icon: BarChart3, label: 'Insights', href: '/insights/copilot-usage' },
   { icon: Table2, label: 'Table view', href: '/table-view/summary' },
 ];
 
 export function Header() {
   const location = useLocation();
+  const navigate = useNavigate();
   const { theme, toggleTheme } = useTheme();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState<GlobalSearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const { peopleCount, teamsCount } = useNavCounts();
+  const searchInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
+  
   const isInsightsActive = location.pathname.startsWith('/insights');
   const isOverviewActive = location.pathname === '/overview';
+  const isPeopleActive = location.pathname === '/people';
   const isTableViewActive = location.pathname.startsWith('/table-view');
+
+  // Handle "/" keyboard shortcut to open search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === '/' && document.activeElement?.tagName !== 'INPUT' && document.activeElement?.tagName !== 'TEXTAREA') {
+        e.preventDefault();
+        setIsSearchOpen(true);
+        setTimeout(() => searchInputRef.current?.focus(), 50);
+      }
+      if (e.key === 'Escape' && isSearchOpen) {
+        setIsSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [isSearchOpen]);
+
+  // Close search when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (searchContainerRef.current && !searchContainerRef.current.contains(e.target as Node)) {
+        setIsSearchOpen(false);
+        setSearchQuery('');
+        setSearchResults([]);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  // Debounced search
+  useEffect(() => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      setIsSearching(true);
+      try {
+        const result = await globalSearch(searchQuery);
+        setSearchResults(result.results);
+      } catch (error) {
+        console.error('Search failed:', error);
+      } finally {
+        setIsSearching(false);
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [searchQuery]);
+
+  const handleResultClick = (result: GlobalSearchResult) => {
+    switch (result.type) {
+      case 'person':
+        navigate(`/people?search=${encodeURIComponent(result.name)}`);
+        break;
+      case 'enterprise':
+        navigate(`/people?search=${encodeURIComponent(result.id)}`);
+        break;
+      case 'ide':
+      case 'language':
+      case 'model':
+        // For now, navigate to insights with a filter note
+        navigate('/insights/copilot-usage');
+        break;
+    }
+    setIsSearchOpen(false);
+    setSearchQuery('');
+    setSearchResults([]);
+  };
+
+  const getResultIcon = (type: GlobalSearchResult['type']) => {
+    switch (type) {
+      case 'person': return <Users size={16} className="text-blue-500" />;
+      case 'enterprise': return <Building2 size={16} className="text-purple-500" />;
+      case 'ide': return <Monitor size={16} className="text-green-500" />;
+      case 'language': return <Code size={16} className="text-orange-500" />;
+      case 'model': return <Cpu size={16} className="text-pink-500" />;
+    }
+  };
+
+  const getResultTypeLabel = (type: GlobalSearchResult['type']) => {
+    switch (type) {
+      case 'person': return 'Person';
+      case 'enterprise': return 'Enterprise';
+      case 'ide': return 'IDE';
+      case 'language': return 'Language';
+      case 'model': return 'Model';
+    }
+  };
+
+  const handleClearData = async () => {
+    try {
+      await clearAllData();
+      setShowClearConfirm(false);
+      window.location.reload();
+    } catch (error) {
+      console.error('Failed to clear data:', error);
+    }
+  };
 
   return (
     <header className="bg-white dark:bg-dark-bgSecondary border-b border-github-border dark:border-dark-border transition-colors duration-200">
@@ -75,11 +196,72 @@ export function Header() {
         
         <div className="flex items-center gap-3">
           {/* Search bar */}
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-md text-sm text-github-textSecondary dark:text-dark-textSecondary">
-            <Search size={14} />
-            <span>Type</span>
-            <kbd className="px-1.5 py-0.5 bg-github-bgSecondary dark:bg-dark-bgTertiary border border-github-border dark:border-dark-border rounded text-xs">/</kbd>
-            <span>to search</span>
+          <div ref={searchContainerRef} className="relative">
+            {!isSearchOpen ? (
+              <button
+                onClick={() => {
+                  setIsSearchOpen(true);
+                  setTimeout(() => searchInputRef.current?.focus(), 50);
+                }}
+                className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-md text-sm text-github-textSecondary dark:text-dark-textSecondary hover:border-gray-400 dark:hover:border-dark-textSecondary transition-colors"
+              >
+                <Search size={14} />
+                <span>Type</span>
+                <kbd className="px-1.5 py-0.5 bg-github-bgSecondary dark:bg-dark-bgTertiary border border-github-border dark:border-dark-border rounded text-xs">/</kbd>
+                <span>to search</span>
+              </button>
+            ) : (
+              <div className="flex items-center gap-2 px-3 py-1.5 bg-white dark:bg-dark-bgSecondary border border-blue-500 rounded-md text-sm min-w-[300px]">
+                <Search size={14} className="text-github-textSecondary dark:text-dark-textSecondary" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Search people, IDEs, languages, models..."
+                  className="flex-1 bg-transparent text-github-text dark:text-dark-text placeholder-github-textSecondary dark:placeholder-dark-textSecondary focus:outline-none"
+                />
+                {isSearching ? (
+                  <Loader2 size={14} className="animate-spin text-github-textSecondary" />
+                ) : (
+                  <button onClick={() => { setIsSearchOpen(false); setSearchQuery(''); setSearchResults([]); }}>
+                    <X size={14} className="text-github-textSecondary hover:text-github-text dark:hover:text-dark-text" />
+                  </button>
+                )}
+              </div>
+            )}
+            
+            {/* Search Results Dropdown */}
+            {isSearchOpen && searchResults.length > 0 && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-lg z-50 max-h-96 overflow-y-auto min-w-[350px]">
+                {searchResults.map((result, idx) => (
+                  <button
+                    key={`${result.type}-${result.id}-${idx}`}
+                    onClick={() => handleResultClick(result)}
+                    className="w-full px-4 py-3 text-left hover:bg-gray-100 dark:hover:bg-dark-bgTertiary flex items-center gap-3 border-b border-github-borderLight dark:border-dark-border last:border-0"
+                  >
+                    {getResultIcon(result.type)}
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium text-github-text dark:text-dark-text truncate">{result.name}</div>
+                      {result.description && (
+                        <div className="text-xs text-github-textSecondary dark:text-dark-textSecondary truncate">
+                          {result.description}
+                        </div>
+                      )}
+                    </div>
+                    <span className="text-xs px-2 py-0.5 rounded-full bg-gray-100 dark:bg-dark-bgTertiary text-github-textSecondary dark:text-dark-textSecondary">
+                      {getResultTypeLabel(result.type)}
+                    </span>
+                  </button>
+                ))}
+              </div>
+            )}
+            
+            {isSearchOpen && searchQuery && searchResults.length === 0 && !isSearching && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-lg z-50 p-4 text-sm text-github-textSecondary dark:text-dark-textSecondary min-w-[300px]">
+                No results found for "{searchQuery}"
+              </div>
+            )}
           </div>
           
           {/* Action icons */}
@@ -119,6 +301,36 @@ export function Header() {
                 </div>
               </div>
             </div>
+
+            {/* Clear data button */}
+            <div className="relative">
+              <button 
+                className="p-2 hover:bg-gray-200 dark:hover:bg-dark-bgTertiary rounded-md transition-colors text-github-text dark:text-dark-text"
+                onClick={() => setShowClearConfirm(true)}
+                title="Clear all data"
+              >
+                <Trash2 size={16} />
+              </button>
+              {showClearConfirm && (
+                <div className="absolute right-0 top-full mt-2 w-64 bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg shadow-lg p-4 z-50">
+                  <p className="text-sm text-github-text dark:text-dark-text mb-3">Clear all data? This cannot be undone.</p>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={handleClearData}
+                      className="px-3 py-1.5 bg-red-600 text-white text-sm rounded-md hover:bg-red-700"
+                    >
+                      Clear
+                    </button>
+                    <button 
+                      onClick={() => setShowClearConfirm(false)}
+                      className="px-3 py-1.5 bg-gray-200 dark:bg-dark-bgTertiary text-github-text dark:text-dark-text text-sm rounded-md hover:bg-gray-300 dark:hover:bg-dark-border"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
           
           {/* User avatar */}
@@ -140,9 +352,14 @@ export function Header() {
             ? isInsightsActive 
             : item.label === 'Overview' 
               ? isOverviewActive 
-              : item.label === 'Table view'
-                ? isTableViewActive
-                : false;
+              : item.label === 'People'
+                ? isPeopleActive
+                : item.label === 'Table view'
+                  ? isTableViewActive
+                  : false;
+          
+          // Get count for specific tabs
+          const count = item.label === 'People' ? peopleCount : item.label === 'Teams' ? teamsCount : null;
           
           return (
             <Link
@@ -156,6 +373,11 @@ export function Header() {
             >
               <Icon size={16} />
               {item.label}
+              {count !== null && count > 0 && (
+                <span className="ml-1 px-1.5 py-0.5 text-xs font-medium rounded-full bg-gray-200 dark:bg-dark-bgTertiary text-gray-700 dark:text-dark-textSecondary">
+                  {count}
+                </span>
+              )}
             </Link>
           );
         })}

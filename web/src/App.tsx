@@ -5,18 +5,22 @@ import { CodeGenerationPage } from '@/pages/CodeGenerationPage';
 import { OverviewPage } from '@/pages/OverviewPage';
 import { TableViewPage } from '@/pages/TableViewPage';
 import { SummaryReportPage } from '@/pages/SummaryReportPage';
+import { PeoplePage } from '@/pages/PeoplePage';
 import { ThemeProvider } from '@/contexts/ThemeContext';
+import { NavCountsProvider } from '@/contexts/NavCountsContext';
 import { ChatbotProvider, ChatbotContainer } from '@/components/Chatbot';
 
 function App() {
   return (
     <ThemeProvider>
     <Router>
+      <NavCountsProvider>
       <ChatbotProvider>
         <Layout>
           <Routes>
             <Route path="/" element={<Navigate to="/insights/copilot-usage" replace />} />
             <Route path="/overview" element={<OverviewPage />} />
+            <Route path="/people" element={<PeoplePage />} />
             <Route path="/insights/copilot-usage" element={<CopilotUsagePage />} />
             <Route path="/insights/code-generation" element={<CodeGenerationPage />} />
             <Route path="/table-view" element={<Navigate to="/table-view/summary" replace />} />
@@ -26,6 +30,7 @@ function App() {
         </Layout>
         <ChatbotContainer />
       </ChatbotProvider>
+      </NavCountsProvider>
     </Router>
     </ThemeProvider>
   );

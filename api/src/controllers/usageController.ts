@@ -494,10 +494,17 @@ export async function processUploadedFile(
   const insertMany = db.transaction((recs: any[]) => {
     for (const record of recs) {
       try {
-        // Extract primary IDE from totals_by_ide if available
+        // Extract primary IDE and IDE version from totals_by_ide if available
         let primaryIde = record.primary_ide || null;
-        if (!primaryIde && record.totals_by_ide && record.totals_by_ide.length > 0) {
-          primaryIde = record.totals_by_ide[0].ide;
+        let primaryIdeVersion = record.primary_ide_version || null;
+        if (record.totals_by_ide && record.totals_by_ide.length > 0) {
+          const firstIde = record.totals_by_ide[0];
+          if (!primaryIde) {
+            primaryIde = firstIde.ide;
+          }
+          if (!primaryIdeVersion && firstIde.last_known_ide_version) {
+            primaryIdeVersion = firstIde.last_known_ide_version.ide_version;
+          }
         }
 
         const result = insertUserDetails.run(
@@ -517,7 +524,7 @@ export async function processUploadedFile(
           record.loc_added_sum || 0,
           record.loc_deleted_sum || 0,
           primaryIde,
-          record.primary_ide_version || null,
+          primaryIdeVersion,
           record.primary_plugin_version || null
         );
 
@@ -1282,4 +1289,185 @@ export async function getAgentCodeChangesByLanguage(timeframe: Timeframe): Promi
   }
 
   return rows;
+}
+
+// Get unique users list for People page
+export interface UserListItem {
+  enterprise_id: string;
+  user_id: number;
+  user_login: string;
+  primary_ide: string | null;
+  primary_ide_version: string | null;
+}
+
+export interface UserListResponse {
+  data: UserListItem[];
+  total: number;
+  page: number;
+  limit: number;
+}
+
+export function getUsersList(page: number = 1, limit: number = 50, search: string = ''): UserListResponse {
+  const db = getDatabase();
+  const offset = (page - 1) * limit;
+  const searchPattern = search ? `%${search}%` : '%';
+
+  const total = db.prepare(`
+    SELECT COUNT(DISTINCT user_id) as count FROM user_usage_details
+    WHERE user_login LIKE ? OR enterprise_id LIKE ? OR CAST(user_id AS TEXT) LIKE ?
+  `).get(searchPattern, searchPattern, searchPattern) as { count: number };
+
+  const rows = db.prepare(`
+    SELECT 
+      enterprise_id,
+      user_id,
+      user_login,
+      primary_ide,
+      primary_ide_version
+    FROM user_usage_details
+    WHERE user_login LIKE ? OR enterprise_id LIKE ? OR CAST(user_id AS TEXT) LIKE ?
+    GROUP BY user_id
+    ORDER BY user_login ASC
+    LIMIT ? OFFSET ?
+  `).all(searchPattern, searchPattern, searchPattern, limit, offset) as UserListItem[];
+
+  return {
+    data: rows,
+    total: total.count,
+    page,
+    limit
+  };
+}
+
+// Global search across all data types
+export interface GlobalSearchResult {
+  type: 'person' | 'ide' | 'language' | 'model' | 'enterprise';
+  id: string;
+  name: string;
+  description?: string;
+}
+
+export interface GlobalSearchResponse {
+  results: GlobalSearchResult[];
+  query: string;
+}
+
+export function globalSearch(query: string, limit: number = 20): GlobalSearchResponse {
+  if (!query.trim()) {
+    return { results: [], query };
+  }
+
+  const db = getDatabase();
+  const searchPattern = `%${query}%`;
+  const results: GlobalSearchResult[] = [];
+
+  // Search people
+  const people = db.prepare(`
+    SELECT DISTINCT user_login, user_id, enterprise_id, primary_ide
+    FROM user_usage_details
+    WHERE user_login LIKE ? OR CAST(user_id AS TEXT) LIKE ?
+    LIMIT 5
+  `).all(searchPattern, searchPattern) as { user_login: string; user_id: number; enterprise_id: string; primary_ide: string | null }[];
+
+  for (const person of people) {
+    results.push({
+      type: 'person',
+      id: String(person.user_id),
+      name: person.user_login,
+      description: `ID: ${person.user_id} • ${person.primary_ide || 'Unknown IDE'}`
+    });
+  }
+
+  // Search enterprises
+  const enterprises = db.prepare(`
+    SELECT DISTINCT enterprise_id, COUNT(DISTINCT user_id) as user_count
+    FROM user_usage_details
+    WHERE enterprise_id LIKE ?
+    GROUP BY enterprise_id
+    LIMIT 3
+  `).all(searchPattern) as { enterprise_id: string; user_count: number }[];
+
+  for (const enterprise of enterprises) {
+    results.push({
+      type: 'enterprise',
+      id: enterprise.enterprise_id,
+      name: enterprise.enterprise_id,
+      description: `${enterprise.user_count} users`
+    });
+  }
+
+  // Search IDEs
+  const ides = db.prepare(`
+    SELECT DISTINCT primary_ide, COUNT(DISTINCT user_id) as user_count
+    FROM user_usage_details
+    WHERE primary_ide LIKE ? AND primary_ide IS NOT NULL
+    GROUP BY primary_ide
+    LIMIT 3
+  `).all(searchPattern) as { primary_ide: string; user_count: number }[];
+
+  for (const ide of ides) {
+    results.push({
+      type: 'ide',
+      id: ide.primary_ide,
+      name: ide.primary_ide,
+      description: `${ide.user_count} users`
+    });
+  }
+
+  // Search languages
+  const languages = db.prepare(`
+    SELECT DISTINCT language, SUM(count) as usage_count
+    FROM user_usage_by_language_model
+    WHERE language LIKE ?
+    GROUP BY language
+    ORDER BY usage_count DESC
+    LIMIT 3
+  `).all(searchPattern) as { language: string; usage_count: number }[];
+
+  for (const lang of languages) {
+    results.push({
+      type: 'language',
+      id: lang.language,
+      name: lang.language,
+      description: `${lang.usage_count.toLocaleString()} requests`
+    });
+  }
+
+  // Search models
+  const models = db.prepare(`
+    SELECT DISTINCT model_name, SUM(requests) as request_count
+    FROM model_usage
+    WHERE model_name LIKE ?
+    GROUP BY model_name
+    ORDER BY request_count DESC
+    LIMIT 3
+  `).all(searchPattern) as { model_name: string; request_count: number }[];
+
+  for (const model of models) {
+    results.push({
+      type: 'model',
+      id: model.model_name,
+      name: model.model_name,
+      description: `${model.request_count.toLocaleString()} requests`
+    });
+  }
+
+  return { results: results.slice(0, limit), query };
+}
+
+// Get counts for navigation tabs (people and teams/enterprises)
+export function getCounts(): { peopleCount: number; teamsCount: number } {
+  const db = getDatabase();
+  
+  const result = db.prepare(`
+    SELECT 
+      COUNT(DISTINCT user_id) as peopleCount,
+      COUNT(DISTINCT enterprise_id) as teamsCount
+    FROM user_usage_details
+  `).get() as { peopleCount: number; teamsCount: number } | undefined;
+  
+  return {
+    peopleCount: result?.peopleCount || 0,
+    teamsCount: result?.teamsCount || 0
+  };
 }
