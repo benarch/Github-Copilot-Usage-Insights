@@ -47,3 +47,20 @@ coverage/
 # Misc
 *.tgz
 .cache/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+.eggs/
+venv/
+env/
+ENV/
+.venv
+
+# GitHub export tool outputs
+github-export-tool/exports/
+!github-export-tool/examples/
