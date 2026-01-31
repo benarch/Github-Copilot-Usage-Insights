@@ -98,7 +98,8 @@ export function TableViewPage() {
           case 'vscode':
             return ide.includes('vscode') || ide.includes('visual studio code');
           case 'visualstudio':
-            return ide.includes('visual studio') && !ide.includes('code');
+            // Match 'visualstudio' (no space) or 'visual studio' (with space), but exclude 'code'
+            return (ide === 'visualstudio' || (ide.includes('visual studio') && !ide.includes('code')));
           case 'intellij':
             return ide.includes('intellij');
           case 'eclipse':
