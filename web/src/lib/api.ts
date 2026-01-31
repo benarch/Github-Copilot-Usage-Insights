@@ -224,6 +224,7 @@ export async function globalSearch(query: string, limit: number = 20): Promise<G
 export interface NavCounts {
   peopleCount: number;
   teamsCount: number;
+  organizationsCount?: number;
 }
 
 export async function fetchNavCounts(): Promise<NavCounts> {

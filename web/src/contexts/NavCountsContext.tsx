@@ -4,6 +4,7 @@ import { fetchNavCounts } from '@/lib/api';
 interface NavCountsContextType {
   peopleCount: number | null;
   teamsCount: number | null;
+  organizationsCount: number | null;
   refreshCounts: () => Promise<void>;
 }
 
@@ -12,12 +13,14 @@ const NavCountsContext = createContext<NavCountsContextType | undefined>(undefin
 export function NavCountsProvider({ children }: { children: ReactNode }) {
   const [peopleCount, setPeopleCount] = useState<number | null>(null);
   const [teamsCount, setTeamsCount] = useState<number | null>(null);
+  const [organizationsCount, setOrganizationsCount] = useState<number | null>(null);
 
   const refreshCounts = useCallback(async () => {
     try {
       const counts = await fetchNavCounts();
       setPeopleCount(counts.peopleCount);
       setTeamsCount(counts.teamsCount);
+      setOrganizationsCount(counts.organizationsCount ?? null);
     } catch (error) {
       console.error('Failed to fetch counts:', error);
     }
@@ -29,7 +32,7 @@ export function NavCountsProvider({ children }: { children: ReactNode }) {
   }, [refreshCounts]);
 
   return (
-    <NavCountsContext.Provider value={{ peopleCount, teamsCount, refreshCounts }}>
+    <NavCountsContext.Provider value={{ peopleCount, teamsCount, organizationsCount, refreshCounts }}>
       {children}
     </NavCountsContext.Provider>
   );

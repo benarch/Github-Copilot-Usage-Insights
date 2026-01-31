@@ -24,6 +24,7 @@ import {
 import { ChatbotButton } from './Chatbot/ChatbotButton';
 import { clearAllData, globalSearch, GlobalSearchResult } from '@/lib/api';
 import { useNavCounts } from '@/contexts/NavCountsContext';
+import { useImportData } from '@/contexts/ImportDataContext';
 
 // GitHub Octocat SVG component
 function GitHubLogo({ className = "w-8 h-8" }: { className?: string }) {
@@ -52,9 +53,14 @@ export function Header() {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<GlobalSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
-  const { peopleCount, teamsCount } = useNavCounts();
+  const { peopleCount, teamsCount: apiTeamsCount, organizationsCount: apiOrganizationsCount } = useNavCounts();
+  const { teams: importedTeams, organizations: importedOrganizations } = useImportData();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
+  
+  // Use imported counts if available, otherwise fall back to API counts
+  const teamsCount = importedTeams.length > 0 ? importedTeams.length : apiTeamsCount;
+  const organizationsCount = importedOrganizations.length > 0 ? importedOrganizations.length : apiOrganizationsCount;
   
   const isInsightsActive = location.pathname.startsWith('/insights');
   const isOverviewActive = location.pathname === '/overview';
@@ -359,7 +365,7 @@ export function Header() {
                   : false;
           
           // Get count for specific tabs
-          const count = item.label === 'People' ? peopleCount : item.label === 'Teams' ? teamsCount : null;
+          const count = item.label === 'People' ? peopleCount : item.label === 'Teams' ? teamsCount : item.label === 'Organizations' ? organizationsCount : null;
           
           return (
             <Link
