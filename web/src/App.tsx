@@ -10,11 +10,13 @@ import { TeamsPage } from '@/pages/TeamsPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NavCountsProvider } from '@/contexts/NavCountsContext';
+import { ImportDataProvider } from '@/contexts/ImportDataContext';
 import { ChatbotProvider, ChatbotContainer } from '@/components/Chatbot';
 
 function App() {
   return (
     <ThemeProvider>
+    <ImportDataProvider>
     <Router>
       <NavCountsProvider>
       <ChatbotProvider>
@@ -36,6 +38,7 @@ function App() {
       </ChatbotProvider>
       </NavCountsProvider>
     </Router>
+    </ImportDataProvider>
     </ThemeProvider>
   );
 }

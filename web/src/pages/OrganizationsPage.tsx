@@ -1,14 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Building2, Search, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface Organization {
-  id: string;
-  name: string;
-  description: string;
-  memberCount: number;
-  teamsCount: number;
-}
+import { useImportData } from '@/contexts/ImportDataContext';
 
 export function OrganizationsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,7 +9,7 @@ export function OrganizationsPage() {
   const initialSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [searchInput, setSearchInput] = useState(initialSearch);
-  const [organizations] = useState<Organization[]>([]);
+  const { organizations } = useImportData();
   const [isLoading] = useState(false);
   const limit = 25;
 
@@ -32,8 +25,7 @@ export function OrganizationsPage() {
 
   // Filter organizations based on search
   const filteredOrganizations = organizations.filter(org =>
-    org.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    org.description.toLowerCase().includes(searchQuery.toLowerCase())
+    org.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const totalPages = Math.ceil(filteredOrganizations.length / limit);
@@ -132,9 +124,6 @@ export function OrganizationsPage() {
                     Organization Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
-                    Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
                     Teams
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
@@ -154,9 +143,6 @@ export function OrganizationsPage() {
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text whitespace-nowrap font-medium">
                       {org.name}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-dark-textSecondary max-w-xs truncate">
-                      {org.description || '—'}
-                    </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text whitespace-nowrap">
                       {org.teamsCount}
                     </td>
@@ -175,7 +161,7 @@ export function OrganizationsPage() {
           <div className="text-center py-20 text-gray-500 dark:text-dark-textSecondary border-2 border-dashed border-gray-200 dark:border-dark-border rounded-lg">
             <Building2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p className="mb-2">No organizations found.</p>
-            <p className="text-sm">Organizations will be populated from your Copilot usage data.</p>
+            <p className="text-sm">Import user data from the Teams page to populate organizations.</p>
           </div>
         )}
 

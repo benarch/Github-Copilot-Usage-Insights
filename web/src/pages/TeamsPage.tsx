@@ -1,14 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { Users2, Search, Upload, Loader2, ChevronLeft, ChevronRight } from 'lucide-react';
-
-interface Team {
-  id: string;
-  name: string;
-  description: string;
-  memberCount: number;
-  organization: string;
-}
+import { useImportData, parseCSV, parseJSON } from '@/contexts/ImportDataContext';
 
 export function TeamsPage() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -16,7 +9,7 @@ export function TeamsPage() {
   const initialSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [searchInput, setSearchInput] = useState(initialSearch);
-  const [teams, setTeams] = useState<Team[]>([]);
+  const { teams, importData } = useImportData();
   const [isLoading] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -66,25 +59,24 @@ export function TeamsPage() {
     setIsImporting(true);
     try {
       const text = await file.text();
-      const data = JSON.parse(text);
+      const fileName = file.name.toLowerCase();
       
-      // Process imported teams data
-      if (Array.isArray(data)) {
-        const importedTeams: Team[] = data.map((item, idx) => ({
-          id: item.id || `team-${idx}`,
-          name: item.name || item.team_name || `Team ${idx + 1}`,
-          description: item.description || '',
-          memberCount: item.member_count || item.memberCount || 0,
-          organization: item.organization || item.org || ''
-        }));
-        setTeams(importedTeams);
+      let users;
+      if (fileName.endsWith('.csv')) {
+        users = parseCSV(text);
+      } else if (fileName.endsWith('.json')) {
+        const data = JSON.parse(text);
+        users = parseJSON(Array.isArray(data) ? data : [data]);
+      } else {
+        throw new Error('Unsupported file format');
       }
+      
+      importData(users);
     } catch (error) {
-      console.error('Failed to import teams:', error);
-      alert('Failed to import teams. Please ensure the file is valid JSON.');
+      console.error('Failed to import data:', error);
+      alert('Failed to import data. Please ensure the file is valid CSV or JSON.');
     } finally {
       setIsImporting(false);
-      // Reset file input
       if (fileInputRef.current) {
         fileInputRef.current.value = '';
       }
@@ -121,7 +113,7 @@ export function TeamsPage() {
               type="file"
               ref={fileInputRef}
               onChange={handleFileChange}
-              accept=".json"
+              accept=".json,.csv"
               className="hidden"
             />
           </div>
@@ -193,9 +185,6 @@ export function TeamsPage() {
                     Team Name
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
-                    Description
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
                     Organization
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-dark-textSecondary uppercase tracking-wider whitespace-nowrap">
@@ -215,9 +204,6 @@ export function TeamsPage() {
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text whitespace-nowrap font-medium">
                       {team.name}
                     </td>
-                    <td className="px-6 py-4 text-sm text-gray-600 dark:text-dark-textSecondary max-w-xs truncate">
-                      {team.description || '—'}
-                    </td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-dark-textSecondary whitespace-nowrap">
                       {team.organization || '—'}
                     </td>
@@ -236,7 +222,7 @@ export function TeamsPage() {
           <div className="text-center py-20 text-gray-500 dark:text-dark-textSecondary border-2 border-dashed border-gray-200 dark:border-dark-border rounded-lg">
             <Users2 className="w-12 h-12 mx-auto mb-4 opacity-50" />
             <p className="mb-2">No teams imported yet.</p>
-            <p className="text-sm mb-4">Import a JSON file with your teams data to get started.</p>
+            <p className="text-sm mb-4">Import a CSV or JSON file with your users data to get started.</p>
             <button
               onClick={handleImportClick}
               className="inline-flex items-center gap-2 px-4 py-2 bg-purple-600 text-white rounded-md hover:bg-purple-700 transition-colors"
