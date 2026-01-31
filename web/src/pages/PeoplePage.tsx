@@ -10,13 +10,23 @@ export function PeoplePage() {
   const initialSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [searchInput, setSearchInput] = useState(initialSearch);
-  const { users: importedUsers } = useImportData();
+  const { users: importedUsers, getUserTeamInfo } = useImportData();
   const limit = 25;
 
-  // Create a map of user login to team info from imported data
-  const userTeamsMap = new Map(
-    importedUsers.map(u => [u.login, { teams: u.teams, team_count: u.team_count }])
+  // Create maps for correlation by login and by id
+  const userTeamsMapByLogin = new Map(
+    importedUsers.map(u => [u.login.toLowerCase(), { teams: u.teams, team_count: u.team_count }])
   );
+  const userTeamsMapById = new Map(
+    importedUsers.map(u => [String(u.id), { teams: u.teams, team_count: u.team_count }])
+  );
+  
+  // Helper to get team info by login or id
+  const getTeamInfoForUser = (userLogin: string, userId: number) => {
+    return userTeamsMapByLogin.get(userLogin.toLowerCase()) || 
+           userTeamsMapById.get(String(userId)) || 
+           null;
+  };
 
   // Sync with URL search params
   useEffect(() => {
@@ -152,7 +162,9 @@ export function PeoplePage() {
                 </tr>
               </thead>
               <tbody className="bg-white dark:bg-dark-bg divide-y divide-gray-200 dark:divide-dark-border">
-                {data.data.map((user, idx) => (
+                {data.data.map((user, idx) => {
+                  const teamInfo = getTeamInfoForUser(user.user_login, user.user_id);
+                  return (
                   <tr 
                     key={`${user.user_id}-${idx}`}
                     className="hover:bg-gray-50 dark:hover:bg-dark-bgSecondary transition-colors"
@@ -170,12 +182,12 @@ export function PeoplePage() {
                       {user.user_login}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900 dark:text-dark-text whitespace-nowrap text-center">
-                      {userTeamsMap.get(user.user_login)?.team_count ?? '—'}
+                      {teamInfo?.team_count ?? '—'}
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-600 dark:text-dark-textSecondary max-w-xs">
                       <div className="flex flex-wrap gap-1">
-                        {userTeamsMap.get(user.user_login)?.teams?.length ? (
-                          userTeamsMap.get(user.user_login)!.teams.map((team, i) => (
+                        {teamInfo?.teams?.length ? (
+                          teamInfo.teams.map((team, i) => (
                             <span key={i} className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300">
                               {team}
                             </span>
@@ -190,7 +202,8 @@ export function PeoplePage() {
                       {user.primary_ide_version || '—'}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

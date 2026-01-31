@@ -54,7 +54,7 @@ export function Header() {
   const [searchResults, setSearchResults] = useState<GlobalSearchResult[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const { peopleCount, teamsCount: apiTeamsCount, organizationsCount: apiOrganizationsCount } = useNavCounts();
-  const { teams: importedTeams, organizations: importedOrganizations } = useImportData();
+  const { teams: importedTeams, organizations: importedOrganizations, clearData: clearImportedData } = useImportData();
   const searchInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   
@@ -161,6 +161,7 @@ export function Header() {
   const handleClearData = async () => {
     try {
       await clearAllData();
+      clearImportedData();
       setShowClearConfirm(false);
       window.location.reload();
     } catch (error) {

@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, ReactNode, useCallback } from 'react';
+import { createContext, useContext, useState, ReactNode, useCallback, useEffect } from 'react';
 
 export interface ImportedUser {
   id: number;
@@ -30,7 +30,10 @@ interface ImportDataContextType {
   organizations: Organization[];
   importData: (users: ImportedUser[]) => void;
   clearData: () => void;
+  getUserTeamInfo: (userLoginOrId: string | number) => { teams: string[]; team_count: number } | null;
 }
+
+const STORAGE_KEY = 'copilot-usage-imported-users';
 
 const ImportDataContext = createContext<ImportDataContextType | undefined>(undefined);
 
@@ -177,20 +180,60 @@ export function ImportDataProvider({ children }: { children: ReactNode }) {
   const [teams, setTeams] = useState<Team[]>([]);
   const [organizations, setOrganizations] = useState<Organization[]>([]);
   
+  // Load from localStorage on mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsedUsers = JSON.parse(stored) as ImportedUser[];
+        setUsers(parsedUsers);
+        setTeams(extractTeams(parsedUsers));
+        setOrganizations(extractOrganizations(parsedUsers));
+      }
+    } catch (error) {
+      console.error('Failed to load imported data from localStorage:', error);
+    }
+  }, []);
+  
   const importData = useCallback((importedUsers: ImportedUser[]) => {
     setUsers(importedUsers);
     setTeams(extractTeams(importedUsers));
     setOrganizations(extractOrganizations(importedUsers));
+    // Persist to localStorage
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(importedUsers));
+    } catch (error) {
+      console.error('Failed to save imported data to localStorage:', error);
+    }
   }, []);
   
   const clearData = useCallback(() => {
     setUsers([]);
     setTeams([]);
     setOrganizations([]);
+    // Clear from localStorage
+    try {
+      localStorage.removeItem(STORAGE_KEY);
+    } catch (error) {
+      console.error('Failed to clear imported data from localStorage:', error);
+    }
   }, []);
   
+  // Get team info for a user by login or id - correlates between API users and imported data
+  const getUserTeamInfo = useCallback((userLoginOrId: string | number): { teams: string[]; team_count: number } | null => {
+    const searchValue = String(userLoginOrId).toLowerCase();
+    const matchedUser = users.find(u => 
+      u.login.toLowerCase() === searchValue || 
+      String(u.id) === searchValue
+    );
+    if (matchedUser) {
+      return { teams: matchedUser.teams, team_count: matchedUser.team_count };
+    }
+    return null;
+  }, [users]);
+  
   return (
-    <ImportDataContext.Provider value={{ users, teams, organizations, importData, clearData }}>
+    <ImportDataContext.Provider value={{ users, teams, organizations, importData, clearData, getUserTeamInfo }}>
       {children}
     </ImportDataContext.Provider>
   );
