@@ -71,8 +71,8 @@ export function TableViewPage() {
 
   const sortOptions = [
     { value: 'none', label: 'No Sorting' },
-    { value: 'asc', label: 'Acceptance Rate (Low → High)' },
-    { value: 'desc', label: 'Acceptance Rate (High → Low)' },
+    { value: 'asc', label: 'Acceptances (Low → High)' },
+    { value: 'desc', label: 'Acceptances (High → Low)' },
   ];
 
   const limitOptions = [25, 50, 75, 100];
@@ -85,9 +85,9 @@ export function TableViewPage() {
     
     // Filter by interaction mode
     if (interactionMode === 'chat') {
-      result = result.filter(row => row.used_chat);
+      result = result.filter(row => Boolean(row.used_chat));
     } else if (interactionMode === 'agent') {
-      result = result.filter(row => row.used_agent);
+      result = result.filter(row => Boolean(row.used_agent));
     }
     
     // Filter by IDE
@@ -111,16 +111,16 @@ export function TableViewPage() {
       });
     }
     
-    // Sort by acceptance rate (acceptances / code generations)
+    // Sort by acceptance count
     if (sortOrder !== 'none') {
-      result = result.slice().sort((a, b) => {
-        const rateA = a.code_generation_activity_count > 0 
-          ? a.code_acceptance_activity_count / a.code_generation_activity_count 
-          : 0;
-        const rateB = b.code_generation_activity_count > 0 
-          ? b.code_acceptance_activity_count / b.code_generation_activity_count 
-          : 0;
-        return sortOrder === 'asc' ? rateA - rateB : rateB - rateA;
+      result.sort((a, b) => {
+        const countA = Number(a.code_acceptance_activity_count) || 0;
+        const countB = Number(b.code_acceptance_activity_count) || 0;
+        if (sortOrder === 'asc') {
+          return countA - countB;
+        } else {
+          return countB - countA;
+        }
       });
     }
     
