@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { BarChart3, Code2, FileText, Table, Users } from 'lucide-react';
+import { BarChart3, Code2, FileText, Table, Users, Users2, Building2 } from 'lucide-react';
 
 const insightsSidebarItems = [
   { icon: BarChart3, label: 'Copilot usage', href: '/insights/copilot-usage' },
@@ -15,12 +15,22 @@ const peopleSidebarItems = [
   { icon: Users, label: 'All Members', href: '/people' },
 ];
 
+const teamsSidebarItems = [
+  { icon: Users2, label: 'All Teams', href: '/teams' },
+];
+
+const organizationsSidebarItems = [
+  { icon: Building2, label: 'All Organizations', href: '/organizations' },
+];
+
 export function Sidebar() {
   const location = useLocation();
   
   // Determine which sidebar to show based on current route
   const isTableView = location.pathname.startsWith('/table-view');
   const isPeople = location.pathname === '/people';
+  const isTeams = location.pathname === '/teams';
+  const isOrganizations = location.pathname === '/organizations';
   
   let sidebarItems = insightsSidebarItems;
   let sectionTitle = 'Insights';
@@ -31,6 +41,12 @@ export function Sidebar() {
   } else if (isPeople) {
     sidebarItems = peopleSidebarItems;
     sectionTitle = 'People';
+  } else if (isTeams) {
+    sidebarItems = teamsSidebarItems;
+    sectionTitle = 'Teams';
+  } else if (isOrganizations) {
+    sidebarItems = organizationsSidebarItems;
+    sectionTitle = 'Organizations';
   }
 
   return (

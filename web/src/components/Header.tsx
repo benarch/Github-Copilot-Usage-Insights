@@ -36,7 +36,7 @@ function GitHubLogo({ className = "w-8 h-8" }: { className?: string }) {
 
 const navItems = [
   { icon: Home, label: 'Overview', href: '/overview' },
-  { icon: Building2, label: 'Organizations', href: '#' },
+  { icon: Building2, label: 'Organizations', href: '/organizations' },
   { icon: Users2, label: 'Teams', href: '/teams' },
   { icon: Users, label: 'People', href: '/people' },
   { icon: BarChart3, label: 'Insights', href: '/insights/copilot-usage' },
