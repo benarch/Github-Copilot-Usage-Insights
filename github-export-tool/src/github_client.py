@@ -4,6 +4,7 @@ GitHub API client for exporting organization data.
 
 import logging
 from typing import List, Dict, Any, Optional
+from datetime import datetime
 from github import Github, GithubException, RateLimitExceededException
 from github.Organization import Organization
 from github.Team import Team
@@ -71,7 +72,8 @@ class GitHubClient:
         rate_limit = self.github.get_rate_limit()
         if rate_limit.core.remaining < 10:
             reset_time = rate_limit.core.reset
-            wait_seconds = (reset_time - time.time()).total_seconds() + 10
+            current_time = datetime.now(reset_time.tzinfo)
+            wait_seconds = (reset_time - current_time).total_seconds() + 10
             if wait_seconds > 0:
                 logger.warning(f"Rate limit low. Waiting {wait_seconds:.0f} seconds...")
                 time.sleep(wait_seconds)
@@ -161,7 +163,7 @@ class GitHubClient:
                     if parent:
                         parent_id = parent.id
                         parent_name = parent.name
-                except:
+                except (AttributeError, GithubException):
                     pass
                 
                 team_data = {

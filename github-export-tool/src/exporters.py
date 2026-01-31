@@ -217,21 +217,21 @@ class Exporter:
         self.json_exporter = JSONExporter(output_dir)
         self.csv_exporter = CSVExporter(output_dir)
     
-    def export(self, data: Dict[str, Any], org_name: str, format: str = "json") -> Any:
+    def export(self, data: Dict[str, Any], org_name: str, export_format: str = "json") -> Any:
         """
         Export data in specified format.
         
         Args:
             data: Data dictionary to export
             org_name: Organization name
-            format: Export format ('json' or 'csv')
+            export_format: Export format ('json' or 'csv')
             
         Returns:
             Path(s) to exported file(s)
         """
-        if format.lower() == "json":
+        if export_format.lower() == "json":
             return self.json_exporter.export(data, org_name)
-        elif format.lower() == "csv":
+        elif export_format.lower() == "csv":
             return self.csv_exporter.export(data, org_name)
         else:
-            raise ValueError(f"Unsupported export format: {format}")
+            raise ValueError(f"Unsupported export format: {export_format}")
