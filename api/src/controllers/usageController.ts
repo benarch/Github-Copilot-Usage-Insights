@@ -318,24 +318,39 @@ export async function getUserUsageDetails(
   const offset = (page - 1) * limit;
   const searchPattern = search ? `%${search}%` : '%';
 
-  // Get total count
+  // Get total count of unique users
   const countRow = db.prepare(`
-    SELECT COUNT(*) as total FROM user_usage_details 
+    SELECT COUNT(DISTINCT user_login) as total FROM user_usage_details 
     WHERE day BETWEEN ? AND ?
     AND (user_login LIKE ? OR enterprise_id LIKE ? OR CAST(user_id AS TEXT) LIKE ?)
   `).get(startDate, endDate, searchPattern, searchPattern, searchPattern) as { total: number };
 
-  // Get paginated data
+  // Get paginated data aggregated by user
   const rows = db.prepare(`
     SELECT 
-      report_start_day, report_end_day, day, enterprise_id, user_id, user_login,
-      user_initiated_interaction_count, code_generation_activity_count, code_acceptance_activity_count,
-      used_agent, used_chat, loc_suggested_to_add_sum, loc_suggested_to_delete_sum,
-      loc_added_sum, loc_deleted_sum, primary_ide, primary_ide_version, primary_plugin_version
+      MIN(report_start_day) as report_start_day, 
+      MAX(report_end_day) as report_end_day, 
+      MAX(day) as day, 
+      enterprise_id, 
+      user_id, 
+      user_login,
+      SUM(user_initiated_interaction_count) as user_initiated_interaction_count, 
+      SUM(code_generation_activity_count) as code_generation_activity_count, 
+      SUM(code_acceptance_activity_count) as code_acceptance_activity_count,
+      MAX(used_agent) as used_agent, 
+      MAX(used_chat) as used_chat, 
+      SUM(loc_suggested_to_add_sum) as loc_suggested_to_add_sum, 
+      SUM(loc_suggested_to_delete_sum) as loc_suggested_to_delete_sum,
+      SUM(loc_added_sum) as loc_added_sum, 
+      SUM(loc_deleted_sum) as loc_deleted_sum, 
+      MAX(primary_ide) as primary_ide, 
+      MAX(primary_ide_version) as primary_ide_version, 
+      MAX(primary_plugin_version) as primary_plugin_version
     FROM user_usage_details 
     WHERE day BETWEEN ? AND ?
     AND (user_login LIKE ? OR enterprise_id LIKE ? OR CAST(user_id AS TEXT) LIKE ?)
-    ORDER BY day DESC, user_login ASC
+    GROUP BY user_login
+    ORDER BY user_login ASC
     LIMIT ? OFFSET ?
   `).all(startDate, endDate, searchPattern, searchPattern, searchPattern, limit, offset) as Array<{
     report_start_day: string;
