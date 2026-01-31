@@ -71,8 +71,8 @@ export function TableViewPage() {
 
   const sortOptions = [
     { value: 'none', label: 'No Sorting' },
-    { value: 'asc', label: 'Acceptance Rate ↑' },
-    { value: 'desc', label: 'Acceptance Rate ↓' },
+    { value: 'asc', label: 'Acceptance Rate (Low → High)' },
+    { value: 'desc', label: 'Acceptance Rate (High → Low)' },
   ];
 
   const limitOptions = [25, 50, 75, 100];
@@ -111,14 +111,14 @@ export function TableViewPage() {
       });
     }
     
-    // Sort by acceptance rate (acceptances / interactions)
+    // Sort by acceptance rate (acceptances / code generations)
     if (sortOrder !== 'none') {
-      result.sort((a, b) => {
-        const rateA = a.user_initiated_interaction_count > 0 
-          ? a.code_acceptance_activity_count / a.user_initiated_interaction_count 
+      result = result.slice().sort((a, b) => {
+        const rateA = a.code_generation_activity_count > 0 
+          ? a.code_acceptance_activity_count / a.code_generation_activity_count 
           : 0;
-        const rateB = b.user_initiated_interaction_count > 0 
-          ? b.code_acceptance_activity_count / b.user_initiated_interaction_count 
+        const rateB = b.code_generation_activity_count > 0 
+          ? b.code_acceptance_activity_count / b.code_generation_activity_count 
           : 0;
         return sortOrder === 'asc' ? rateA - rateB : rateB - rateA;
       });
