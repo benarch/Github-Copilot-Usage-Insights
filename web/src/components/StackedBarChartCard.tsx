@@ -18,13 +18,13 @@ interface StackedBarChartCardProps {
   isLoading?: boolean;
 }
 
-// Colors matching GitHub Copilot Insights dark mode
+// Colors matching GitHub Copilot Insights - green scheme for chat mode requests
 const COLORS = {
-  edit: '#484f58',    // Gray
-  ask: '#56d364',     // Light green
-  agent: '#3fb950',   // Green
-  custom: '#d29922',  // Orange/yellow
-  inline: '#8b949e',  // Light gray
+  edit: '#166534',     // Dark green
+  ask: '#22c55e',      // Green
+  agent: '#4ade80',    // Light green
+  custom: '#86efac',   // Lighter green
+  inline: '#bbf7d0',   // Very light green
 };
 
 const LABELS = {

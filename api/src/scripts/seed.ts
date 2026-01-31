@@ -12,11 +12,18 @@ function generateSeedData() {
     DELETE FROM model_usage;
     DELETE FROM agent_adoption;
     DELETE FROM user_usage_details;
+    DELETE FROM user_usage_by_language_model;
+    DELETE FROM user_usage_by_model_feature;
+    DELETE FROM user_usage_by_ide;
+    DELETE FROM user_usage_by_feature;
+    DELETE FROM user_usage_by_language_feature;
   `);
 
   const today = new Date();
   const modes = ['edit', 'ask', 'agent', 'custom', 'inline'] as const;
+  const features = ['code_completion', 'chat', 'agent', 'edit'] as const;
   const models = ['Claude Sonnet 4.5', 'GPT-4o', 'Claude Opus 4', 'Gemini Pro'];
+  const languages = ['Python', 'TypeScript', 'JavaScript', 'C#', 'Java', 'Go', 'Rust', 'TSX', 'Ruby', 'PHP'];
 
   // Sample user logins for user_usage_details
   const userLogins = [
@@ -153,6 +160,50 @@ function generateSeedData() {
           ideVersion,
           pluginVersion
         );
+
+        // Get the last inserted user_usage_details id
+        const lastId = db.prepare('SELECT last_insert_rowid() as id').get() as { id: number };
+        const userUsageId = lastId.id;
+
+        // Insert user_usage_by_language_model data
+        const userLanguages = languages.slice(0, 3 + Math.floor(Math.random() * 4));
+        for (const lang of userLanguages) {
+          for (const model of models) {
+            // Weight models differently - Claude Sonnet 4.5 most popular
+            let baseCount = Math.floor(Math.random() * 20) + 1;
+            if (model === 'Claude Sonnet 4.5') baseCount *= 3;
+            else if (model === 'GPT-4o') baseCount *= 2;
+            else if (model === 'Claude Opus 4') baseCount *= 1.5;
+            
+            if (baseCount > 0) {
+              db.prepare(`
+                INSERT INTO user_usage_by_language_model (user_usage_id, language, model, count)
+                VALUES (?, ?, ?, ?)
+              `).run(userUsageId, lang, model, Math.floor(baseCount));
+            }
+          }
+        }
+
+        // Insert user_usage_by_model_feature data
+        for (const model of models) {
+          for (const feature of features) {
+            // Weight models and features differently
+            let baseCount = Math.floor(Math.random() * 30) + 1;
+            if (model === 'Claude Sonnet 4.5') baseCount *= 3;
+            else if (model === 'GPT-4o') baseCount *= 2;
+            else if (model === 'Claude Opus 4') baseCount *= 1.5;
+
+            if (feature === 'agent') baseCount *= 2;
+            else if (feature === 'chat') baseCount *= 1.5;
+            
+            if (baseCount > 0) {
+              db.prepare(`
+                INSERT INTO user_usage_by_model_feature (user_usage_id, model, feature, count)
+                VALUES (?, ?, ?, ?)
+              `).run(userUsageId, model, feature, Math.floor(baseCount));
+            }
+          }
+        }
       }
     }
   }

@@ -14,12 +14,12 @@ export function ChatMessage({ message }: ChatMessageProps) {
       <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
         isUser 
           ? 'bg-gradient-to-br from-purple-500 to-blue-500' 
-          : 'bg-github-bgSecondary border border-github-border'
+          : 'bg-github-bgSecondary dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border'
       }`}>
         {isUser ? (
           <User size={16} className="text-white" />
         ) : (
-          <Bot size={16} className="text-github-text" />
+          <Bot size={16} className="text-github-text dark:text-dark-text" />
         )}
       </div>
       
@@ -28,7 +28,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         <div className={`px-4 py-2.5 rounded-2xl ${
           isUser 
             ? 'bg-blue-500 text-white' 
-            : 'bg-github-bgSecondary border border-github-border text-github-text'
+            : 'bg-github-bgSecondary dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border text-github-text dark:text-dark-text'
         }`}>
           <div className="text-sm whitespace-pre-wrap break-words">
             {message.content}
@@ -36,7 +36,7 @@ export function ChatMessage({ message }: ChatMessageProps) {
         </div>
         
         {/* Timestamp */}
-        <span className="text-xs text-github-textSecondary px-1">
+        <span className="text-xs text-github-textSecondary dark:text-dark-textSecondary px-1">
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </span>
       </div>

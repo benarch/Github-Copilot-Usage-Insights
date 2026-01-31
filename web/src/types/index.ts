@@ -80,3 +80,89 @@ export interface ChatResponse {
   data?: any[];
   suggestedFollowups?: string[];
 }
+
+// Model usage distribution for donut chart
+export interface ModelUsageDistribution {
+  name: string;
+  value: number;
+  percentage: number;
+}
+
+// Model usage per day for multi-line chart
+export interface ModelUsagePerDay {
+  date: string;
+  [model: string]: string | number;
+}
+
+// Model usage per language for stacked bar chart
+export interface ModelUsagePerLanguage {
+  language: string;
+  [model: string]: string | number;
+}
+
+// Model usage per chat mode for stacked bar chart
+export interface ModelUsagePerChatMode {
+  model: string;
+  edit: number;
+  ask: number;
+  agent: number;
+  custom: number;
+  inline: number;
+}
+
+// Code completions data for dual-line chart
+export interface CodeCompletionsDataPoint {
+  date: string;
+  suggested: number;
+  accepted: number;
+}
+
+// Code completions acceptance rate
+export interface AcceptanceRateDataPoint {
+  date: string;
+  rate: number;
+}
+
+// Code generation summary stats
+export interface CodeGenSummary {
+  linesOfCodeChanged: number;
+  agentContribution: number;
+  avgLinesDeletedByAgent: number;
+}
+
+// Daily lines added/deleted
+export interface DailyLinesDataPoint {
+  date: string;
+  added: number;
+  deleted: number;
+}
+
+// User-initiated code changes by mode
+export interface UserCodeChangesByMode {
+  mode: string;
+  suggested: number;
+  added: number;
+}
+
+// Agent-initiated code changes
+export interface AgentCodeChanges {
+  mode: string;
+  added: number;
+  deleted: number;
+}
+
+// Code changes by model
+export interface CodeChangesByModel {
+  model: string;
+  suggested: number;
+  added: number;
+  deleted: number;
+}
+
+// Code changes by language
+export interface CodeChangesByLanguage {
+  language: string;
+  suggested: number;
+  added: number;
+  deleted: number;
+}

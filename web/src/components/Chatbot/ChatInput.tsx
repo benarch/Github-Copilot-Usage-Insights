@@ -33,7 +33,7 @@ export function ChatInput({ onSend, disabled }: ChatInputProps) {
         placeholder="Ask about Copilot usage..."
         disabled={disabled}
         rows={1}
-        className="flex-1 px-4 py-2.5 bg-github-bgSecondary border border-github-border rounded-lg text-sm text-github-text placeholder:text-github-textSecondary focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+        className="flex-1 px-4 py-2.5 bg-github-bgSecondary dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg text-sm text-github-text dark:text-dark-text placeholder:text-github-textSecondary dark:placeholder:text-dark-textSecondary focus:outline-none focus:ring-2 focus:ring-primary-600 focus:border-transparent resize-none disabled:opacity-50 disabled:cursor-not-allowed"
       />
       <button
         type="submit"

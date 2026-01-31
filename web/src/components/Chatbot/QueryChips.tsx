@@ -20,7 +20,7 @@ export function QueryChips({ onQuerySelect, disabled }: QueryChipsProps) {
           key={query}
           onClick={() => onQuerySelect(query)}
           disabled={disabled}
-          className="px-3 py-1.5 text-xs bg-github-bgSecondary border border-github-border rounded-full hover:bg-github-border transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-github-text"
+          className="px-3 py-1.5 text-xs bg-github-bgSecondary dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-full hover:bg-github-border dark:hover:bg-dark-border transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-github-text dark:text-dark-text"
         >
           {query}
         </button>

@@ -78,6 +78,48 @@ export interface StackedChartDataPoint {
   inline: number;
 }
 
+// Model usage distribution for donut chart
+export interface ModelUsageDistribution {
+  name: string;
+  value: number;
+  percentage: number;
+}
+
+// Model usage per day for multi-line chart
+export interface ModelUsagePerDay {
+  date: string;
+  [model: string]: string | number;
+}
+
+// Model usage per language for stacked bar chart
+export interface ModelUsagePerLanguage {
+  language: string;
+  [model: string]: string | number;
+}
+
+// Model usage per chat mode for stacked bar chart
+export interface ModelUsagePerChatMode {
+  model: string;
+  edit: number;
+  ask: number;
+  agent: number;
+  custom: number;
+  inline: number;
+}
+
+// Code completions data for dual-line chart
+export interface CodeCompletionsDataPoint {
+  date: string;
+  suggested: number;
+  accepted: number;
+}
+
+// Code completions acceptance rate
+export interface AcceptanceRateDataPoint {
+  date: string;
+  rate: number;
+}
+
 // NDJSON Data Schemas for ingestion
 export const NDJSONTotalsByIdeSchema = z.object({
   ide: z.string(),

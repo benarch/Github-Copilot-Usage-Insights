@@ -57,3 +57,108 @@ export function useIDEUsage(timeframe: Timeframe) {
     queryFn: () => api.fetchIDEUsage(timeframe),
   });
 }
+
+export function useModelDistribution(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['modelDistribution', timeframe],
+    queryFn: () => api.fetchModelDistribution(timeframe),
+  });
+}
+
+export function useModelUsagePerDay(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['modelUsagePerDay', timeframe],
+    queryFn: () => api.fetchModelUsagePerDay(timeframe),
+  });
+}
+
+export function useModelUsagePerLanguage(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['modelUsagePerLanguage', timeframe],
+    queryFn: () => api.fetchModelUsagePerLanguage(timeframe),
+  });
+}
+
+export function useModelUsagePerChatMode(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['modelUsagePerChatMode', timeframe],
+    queryFn: () => api.fetchModelUsagePerChatMode(timeframe),
+  });
+}
+
+export function useCodeCompletions(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['codeCompletions', timeframe],
+    queryFn: () => api.fetchCodeCompletions(timeframe),
+  });
+}
+
+export function useAcceptanceRate(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['acceptanceRate', timeframe],
+    queryFn: () => api.fetchAcceptanceRate(timeframe),
+  });
+}
+
+export function useCodeGenSummary(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['codeGenSummary', timeframe],
+    queryFn: () => api.fetchCodeGenSummary(timeframe),
+  });
+}
+
+export function useDailyLines(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['dailyLines', timeframe],
+    queryFn: () => api.fetchDailyLines(timeframe),
+  });
+}
+
+export function useUserCodeChangesByMode(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['userCodeChangesByMode', timeframe],
+    queryFn: () => api.fetchUserCodeChangesByMode(timeframe),
+  });
+}
+
+export function useAgentCodeChanges(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['agentCodeChanges', timeframe],
+    queryFn: () => api.fetchAgentCodeChanges(timeframe),
+  });
+}
+
+export function useUserCodeChangesByModel(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['userCodeChangesByModel', timeframe],
+    queryFn: () => api.fetchUserCodeChangesByModel(timeframe),
+  });
+}
+
+export function useAgentCodeChangesByModel(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['agentCodeChangesByModel', timeframe],
+    queryFn: () => api.fetchAgentCodeChangesByModel(timeframe),
+  });
+}
+
+export function useUserCodeChangesByLanguage(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['userCodeChangesByLanguage', timeframe],
+    queryFn: () => api.fetchUserCodeChangesByLanguage(timeframe),
+  });
+}
+
+export function useAgentCodeChangesByLanguage(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['agentCodeChangesByLanguage', timeframe],
+    queryFn: () => api.fetchAgentCodeChangesByLanguage(timeframe),
+  });
+}
+
+export function useIDEWeeklyActiveUsers(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['ideWeeklyActiveUsers', timeframe],
+    queryFn: () => api.fetchIDEWeeklyActiveUsers(timeframe),
+  });
+}

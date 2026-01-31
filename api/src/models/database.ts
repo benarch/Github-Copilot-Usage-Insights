@@ -178,3 +178,22 @@ export function closeDatabase(): void {
     dbInstance = null;
   }
 }
+
+export function clearAllData(): void {
+  const db = getDatabase();
+  
+  // Clear all tables in the correct order (child tables first due to foreign keys)
+  db.exec(`
+    DELETE FROM user_usage_by_model_feature;
+    DELETE FROM user_usage_by_language_model;
+    DELETE FROM user_usage_by_language_feature;
+    DELETE FROM user_usage_by_feature;
+    DELETE FROM user_usage_by_ide;
+    DELETE FROM user_usage_details;
+    DELETE FROM agent_adoption;
+    DELETE FROM model_usage;
+    DELETE FROM chat_mode_requests;
+    DELETE FROM weekly_usage;
+    DELETE FROM daily_usage;
+  `);
+}

@@ -1,26 +1,216 @@
-import { useState } from 'react';
-import { Info, Download } from 'lucide-react';
+import { useState, useRef, useMemo } from 'react';
+import { Info, Download, Upload } from 'lucide-react';
 import { StatsCard } from '@/components/StatsCard';
 import { AreaChartCard } from '@/components/AreaChartCard';
 import { StackedBarChartCard } from '@/components/StackedBarChartCard';
+import { StackedAreaChartCard } from '@/components/StackedAreaChartCard';
+import { DonutChartCard } from '@/components/DonutChartCard';
+import { MultiLineChartCard } from '@/components/MultiLineChartCard';
+import { DynamicStackedBarChart } from '@/components/DynamicStackedBarChart';
 import { TimeframeDropdown } from '@/components/TimeframeDropdown';
+import { uploadJsonFile } from '@/lib/api';
 import { 
   useSummary, 
   useDailyActiveUsers, 
   useWeeklyActiveUsers, 
   useAvgChatRequests,
-  useChatModeRequests 
+  useChatModeRequests,
+  useModelDistribution,
+  useModelUsagePerDay,
+  useModelUsagePerLanguage,
+  useModelUsagePerChatMode,
+  useCodeCompletions,
+  useAcceptanceRate,
+  useIDEWeeklyActiveUsers
 } from '@/hooks/useUsageData';
 import type { Timeframe } from '@/types';
 
+// Model usage per day colors - matching actual model names from API
+const MODEL_USAGE_COLORS: Record<string, { color: string; dashed: boolean }> = {
+  'claude-4.0-sonnet': { color: '#6366f1', dashed: true },     // Indigo dashed
+  'claude-4.5-sonnet': { color: '#8b5cf6', dashed: false },    // Purple solid
+  'claude-3.5-sonnet': { color: '#a78bfa', dashed: true },     // Light purple dashed
+  'claude-4.5-haiku': { color: '#c4b5fd', dashed: false },     // Lavender solid
+  'gpt-4.1': { color: '#22c55e', dashed: false },              // Green solid
+  'gpt-4o': { color: '#16a34a', dashed: true },                // Dark green dashed
+  'gpt-4o-mini': { color: '#4ade80', dashed: false },          // Light green solid
+  'gpt-5.0': { color: '#2dd4bf', dashed: true },               // Teal dashed
+  'gpt-5.1': { color: '#14b8a6', dashed: false },              // Darker teal solid
+  'gpt-5-mini': { color: '#5eead4', dashed: true },            // Light teal dashed
+  'gpt-5-codex': { color: '#f59e0b', dashed: false },          // Amber solid
+  'gpt-5.1-codex': { color: '#fbbf24', dashed: true },         // Yellow dashed
+};
+
+// Model colors for language stacked bar chart (orange/brown tones like GitHub)
+const MODEL_LANGUAGE_COLORS: Record<string, string> = {
+  'claude-4.0-sonnet': '#5c3d2e',     // Dark brown
+  'claude-4.5-sonnet': '#92400e',     // Brown
+  'claude-3.5-sonnet': '#b45309',     // Dark orange
+  'claude-4.5-haiku': '#d97706',      // Orange
+  'gpt-4.1': '#ea580c',               // Bright orange
+  'gpt-4o': '#f97316',                // Light orange
+  'gpt-4o-mini': '#fb923c',           // Lighter orange
+  'gpt-5.0': '#fdba74',               // Pale orange
+  'gpt-5.1': '#fed7aa',               // Very pale orange
+  'gpt-5-mini': '#fef3c7',            // Cream
+  'gpt-5-codex': '#fde68a',           // Light yellow
+  'gpt-5.1-codex': '#fef9c3',         // Very light yellow
+};
+
+// Chat mode colors - green scheme for requests per chat mode
+const CHAT_MODE_COLORS: Record<string, string> = {
+  edit: '#166534',    // Dark green
+  ask: '#22c55e',     // Green  
+  agent: '#4ade80',   // Light green
+  custom: '#86efac',  // Lighter green
+  inline: '#bbf7d0',  // Very light green
+};
+
+// IDE colors - blue scheme for IDE breakdowns
+const IDE_COLORS: Record<string, string> = {
+  'vscode': '#007ACC',           // VS Code blue
+  'jetbrains': '#E95420',        // JetBrains orange
+  'visualstudio': '#5C2D91',     // VS purple
+  'neovim': '#57A143',           // Neovim green
+  'vim': '#019733',              // Vim green
+  'xcode': '#147EFB',            // Xcode blue
+  'azure_data_studio': '#0078D4',// Azure blue
+  'eclipse': '#2C2255',          // Eclipse purple
+};
+
 export function CopilotUsagePage() {
   const [timeframe, setTimeframe] = useState<Timeframe>('28');
+  const [isUploading, setIsUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
-  const { data: summary, isLoading: summaryLoading } = useSummary(timeframe);
-  const { data: dailyUsers, isLoading: dailyLoading } = useDailyActiveUsers(timeframe);
-  const { data: weeklyUsers, isLoading: weeklyLoading } = useWeeklyActiveUsers(timeframe);
-  const { data: avgChatRequests, isLoading: avgChatLoading } = useAvgChatRequests(timeframe);
-  const { data: chatModeRequests, isLoading: chatModeLoading } = useChatModeRequests(timeframe);
+  const { data: summary, isLoading: summaryLoading, refetch: refetchSummary } = useSummary(timeframe);
+  const { data: dailyUsers, isLoading: dailyLoading, refetch: refetchDaily } = useDailyActiveUsers(timeframe);
+  const { data: weeklyUsers, isLoading: weeklyLoading, refetch: refetchWeekly } = useWeeklyActiveUsers(timeframe);
+  const { data: avgChatRequests, isLoading: avgChatLoading, refetch: refetchAvgChat } = useAvgChatRequests(timeframe);
+  const { data: chatModeRequests, isLoading: chatModeLoading, refetch: refetchChatMode } = useChatModeRequests(timeframe);
+  const { data: modelDistribution, isLoading: modelDistLoading, refetch: refetchModelDist } = useModelDistribution(timeframe);
+  const { data: modelUsagePerDay, isLoading: modelDayLoading, refetch: refetchModelDay } = useModelUsagePerDay(timeframe);
+  const { data: modelUsagePerLanguage, isLoading: modelLangLoading, refetch: refetchModelLang } = useModelUsagePerLanguage(timeframe);
+  const { data: modelUsagePerChatMode, isLoading: modelChatModeLoading, refetch: refetchModelChatMode } = useModelUsagePerChatMode(timeframe);
+  const { data: codeCompletions, isLoading: completionsLoading, refetch: refetchCompletions } = useCodeCompletions(timeframe);
+  const { data: acceptanceRate, isLoading: acceptanceLoading, refetch: refetchAcceptance } = useAcceptanceRate(timeframe);
+  const { data: ideWeeklyActiveUsers, isLoading: ideWeeklyLoading, refetch: refetchIdeWeekly } = useIDEWeeklyActiveUsers(timeframe);
+
+  // Transform IDE weekly data for stacked bar chart
+  const ideWeeklyData = useMemo(() => {
+    if (!ideWeeklyActiveUsers || ideWeeklyActiveUsers.length === 0) return [];
+    
+    // Group by week and pivot IDE data
+    const weekMap = new Map<string, Record<string, number>>();
+    for (const row of ideWeeklyActiveUsers) {
+      if (!weekMap.has(row.week_start)) {
+        weekMap.set(row.week_start, { date: row.week_start } as any);
+      }
+      const week = weekMap.get(row.week_start)!;
+      week[row.ide] = row.users;
+    }
+    return Array.from(weekMap.values()).sort((a, b) => a.date.localeCompare(b.date));
+  }, [ideWeeklyActiveUsers]);
+
+  // Get unique IDE names for the chart
+  const ideNames = useMemo(() => {
+    if (!ideWeeklyActiveUsers) return [];
+    return [...new Set(ideWeeklyActiveUsers.map(r => r.ide))];
+  }, [ideWeeklyActiveUsers]);
+
+  // IDE bars configuration - use a color scheme with fallback
+  const ideBars = ideNames.map((ide, index) => ({
+    key: ide,
+    name: ide,
+    color: IDE_COLORS[ide] || `hsl(${index * 45}, 70%, 50%)`
+  }));
+
+  // Sort models by total usage (descending) for consistent ordering
+  const sortedModelKeys = useMemo(() => {
+    if (!modelUsagePerDay || modelUsagePerDay.length === 0) return [];
+    const totals: Record<string, number> = {};
+    for (const day of modelUsagePerDay) {
+      for (const [key, val] of Object.entries(day)) {
+        if (key !== 'date' && typeof val === 'number') {
+          totals[key] = (totals[key] || 0) + val;
+        }
+      }
+    }
+    return Object.entries(totals)
+      .sort((a, b) => b[1] - a[1])
+      .map(([key]) => key);
+  }, [modelUsagePerDay]);
+
+  // Areas config for stacked area chart (Model usage per day)
+  const modelAreas = sortedModelKeys.map((key, index) => {
+    const config = MODEL_USAGE_COLORS[key] || { color: `hsl(${index * 30}, 70%, 50%)`, dashed: index % 2 === 0 };
+    return {
+      key,
+      name: key,
+      color: config.color,
+      strokeDasharray: config.dashed ? '5 5' : undefined
+    };
+  });
+
+  // Language chart model bars configuration - use orange/brown colors
+  const languageModelKeys = modelUsagePerLanguage && modelUsagePerLanguage.length > 0
+    ? Object.keys(modelUsagePerLanguage[0]).filter(k => k !== 'language')
+    : [];
+  
+  const languageModelBars = languageModelKeys.map(key => ({
+    key,
+    name: key,
+    color: MODEL_LANGUAGE_COLORS[key] || '#8b949e'
+  }));
+
+  // Chat mode bars configuration for model usage per chat mode - blue scheme
+  const chatModeBars = [
+    { key: 'edit', name: 'Edit', color: '#0d1b3e' },
+    { key: 'ask', name: 'Ask', color: '#1f4b99' },
+    { key: 'agent', name: 'Agent', color: '#5a8ed4' },
+    { key: 'custom', name: 'Custom', color: '#8bb4e7' },
+    { key: 'inline', name: 'Inline', color: '#c4d9f2' },
+  ];
+
+  const handleUploadClick = () => {
+    fileInputRef.current?.click();
+  };
+
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.name.endsWith('.json') && !file.name.endsWith('.ndjson')) {
+      alert('Please select a JSON or NDJSON file');
+      return;
+    }
+
+    setIsUploading(true);
+    try {
+      const result = await uploadJsonFile(file);
+      alert(`Upload successful! ${result.recordsImported || 0} records imported.`);
+      // Refetch all data to show new records
+      refetchSummary();
+      refetchDaily();
+      refetchWeekly();
+      refetchAvgChat();
+      refetchChatMode();
+      refetchModelDist();
+      refetchModelDay();
+      refetchModelLang();
+      refetchModelChatMode();
+      refetchCompletions();
+      refetchAcceptance();
+      refetchIdeWeekly();
+    } catch (error) {
+      alert(`Upload failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
+    } finally {
+      setIsUploading(false);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    }
+  };
 
   return (
     <div className="max-w-7xl">
@@ -41,6 +231,21 @@ export function CopilotUsagePage() {
             Give feedback
           </a>
           <TimeframeDropdown value={timeframe} onChange={setTimeframe} />
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept=".json,.ndjson"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+          <button
+            onClick={handleUploadClick}
+            disabled={isUploading}
+            className="p-2 hover:bg-github-bgSecondary dark:hover:bg-dark-bgTertiary border border-github-border dark:border-dark-border rounded-md transition-colors disabled:opacity-50"
+            title="Upload JSON file for analysis"
+          >
+            <Upload size={16} className="text-github-textSecondary dark:text-dark-textSecondary" />
+          </button>
           <button className="p-2 hover:bg-github-bgSecondary dark:hover:bg-dark-bgTertiary border border-github-border dark:border-dark-border rounded-md transition-colors">
             <Download size={16} className="text-github-textSecondary dark:text-dark-textSecondary" />
           </button>
@@ -80,12 +285,14 @@ export function CopilotUsagePage() {
           isLoading={dailyLoading}
           darkColor="#58a6ff"
         />
-        <AreaChartCard
+        <DynamicStackedBarChart
           title="IDE weekly active users"
-          subtitle="Unique users who used Copilot on a given week, either via chat or code completions"
-          data={weeklyUsers || []}
-          isLoading={weeklyLoading}
-          darkColor="#58a6ff"
+          subtitle="Unique users who used Copilot per IDE each week"
+          data={ideWeeklyData}
+          bars={ideBars}
+          xAxisKey="date"
+          yAxisLabel="Users"
+          isLoading={ideWeeklyLoading}
         />
       </div>
 
@@ -101,13 +308,118 @@ export function CopilotUsagePage() {
         />
       </div>
 
-      {/* Stacked Bar Chart */}
-      <div>
+      {/* 1. Requests per chat mode */}
+      <div className="mb-4">
         <StackedBarChartCard
           title="Requests per chat mode"
           subtitle="User-initiated chat requests across all modes"
           data={chatModeRequests || []}
           isLoading={chatModeLoading}
+        />
+      </div>
+
+      {/* 2. Code completions */}
+      <div className="mb-4">
+        <MultiLineChartCard
+          title="Code completions"
+          subtitle="Inline code suggestions shown and accepted"
+          data={codeCompletions || []}
+          lines={[
+            { key: 'accepted', name: 'Accepted completions', color: '#8b5cf6' },
+            { key: 'suggested', name: 'Suggested completions', color: '#a371f7', strokeDasharray: '5 5' },
+          ]}
+          yAxisLabel="Completions"
+          isLoading={completionsLoading}
+        />
+      </div>
+
+      {/* 3. Code completions acceptance rate */}
+      <div className="mb-4">
+        <AreaChartCard
+          title="Code completions acceptance rate"
+          subtitle="Percentage of shown inline completions that were either fully or partially accepted"
+          data={acceptanceRate?.map(d => ({ date: d.date, value: d.rate })) || []}
+          yAxisLabel="%"
+          isLoading={acceptanceLoading}
+          color="#22c55e"
+          darkColor="#3fb950"
+        />
+      </div>
+
+      {/* 4. Model usage per day */}
+      <div className="mb-4">
+        <StackedAreaChartCard
+          title="Model usage per day"
+          subtitle="Daily breakdown of models used in requests across all chat modes, excluding code completions"
+          data={modelUsagePerDay || []}
+          areas={modelAreas}
+          yAxisLabel="%"
+          yAxisDomain={[0, 100]}
+          showPercentage={true}
+          isLoading={modelDayLoading}
+        />
+      </div>
+
+      {/* 5. Chat model usage & 6. Model usage per chat mode */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <DonutChartCard
+          title="Chat model usage"
+          subtitle="Distribution of models used across all chat modes"
+          data={modelDistribution || []}
+          isLoading={modelDistLoading}
+        />
+
+        <DynamicStackedBarChart
+          title="Model usage per chat mode"
+          subtitle="Most frequently used models for user-initiated chat requests"
+          data={modelUsagePerChatMode || []}
+          xAxisKey="model"
+          bars={chatModeBars}
+          isLoading={modelChatModeLoading}
+        />
+      </div>
+
+      {/* 7. Language usage per day - derived from language data */}
+      <div className="mb-4">
+        <StackedAreaChartCard
+          title="Language usage per day"
+          subtitle="Daily breakdown of programming languages used in code completions"
+          data={modelUsagePerDay || []}
+          areas={modelAreas.slice(0, 5).map((area, i) => ({
+            ...area,
+            name: ['TypeScript', 'Python', 'JavaScript', 'Java', 'Other languages'][i] || area.name,
+            color: ['#3b82f6', '#8b5cf6', '#22c55e', '#14b8a6', '#f59e0b'][i] || area.color,
+            strokeDasharray: [true, true, false, true, false][i] ? '5 5' : undefined,
+          }))}
+          yAxisLabel="%"
+          yAxisDomain={[0, 100]}
+          showPercentage={true}
+          isLoading={modelDayLoading}
+        />
+      </div>
+
+      {/* 8. Language usage - Donut chart for language distribution */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
+        <DonutChartCard
+          title="Language usage"
+          subtitle="Distribution of programming languages used across all code completions"
+          data={modelDistribution?.map((d, i) => ({
+            ...d,
+            name: ['TypeScript', 'Python', 'JavaScript', 'Java', 'Other languages'][i] || d.name
+          })) || []}
+          isLoading={modelDistLoading}
+          colors={['#5c3d2e', '#d97706', '#f4a460', '#fbbf24', '#fef3c7']}
+        />
+
+        {/* 9. Model usage per language */}
+        <DynamicStackedBarChart
+          title="Model usage per language"
+          subtitle="Most frequently used model in each language for user-initiated chat requests"
+          data={modelUsagePerLanguage || []}
+          xAxisKey="language"
+          bars={languageModelBars}
+          yAxisLabel="%"
+          isLoading={modelLangLoading}
         />
       </div>
     </div>

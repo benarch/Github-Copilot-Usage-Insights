@@ -1,8 +1,24 @@
 import { Router, Request, Response } from 'express';
+import multer from 'multer';
 import { TimeframeSchema } from '../models/types.js';
 import * as usageController from '../controllers/usageController.js';
 
 const router = Router();
+
+// Configure multer for file uploads
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB limit
+  },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype === 'application/json' || file.originalname.endsWith('.json') || file.originalname.endsWith('.ndjson')) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only JSON and NDJSON files are allowed'));
+    }
+  },
+});
 
 /**
  * @openapi
@@ -22,10 +38,10 @@ const router = Router();
  *       200:
  *         description: Dashboard summary data
  */
-router.get('/summary', (req: Request, res: Response) => {
+router.get('/summary', async (req: Request, res: Response) => {
   try {
     const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
-    const summary = usageController.getDashboardSummary(timeframe);
+    const summary = await usageController.getDashboardSummary(timeframe);
     res.json(summary);
   } catch (error) {
     res.status(400).json({ error: 'Invalid timeframe parameter' });
@@ -49,10 +65,10 @@ router.get('/summary', (req: Request, res: Response) => {
  *       200:
  *         description: Daily active users data points
  */
-router.get('/daily-active-users', (req: Request, res: Response) => {
+router.get('/daily-active-users', async (req: Request, res: Response) => {
   try {
     const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
-    const data = usageController.getDailyActiveUsers(timeframe);
+    const data = await usageController.getDailyActiveUsers(timeframe);
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Invalid timeframe parameter' });
@@ -76,10 +92,10 @@ router.get('/daily-active-users', (req: Request, res: Response) => {
  *       200:
  *         description: Weekly active users data points
  */
-router.get('/weekly-active-users', (req: Request, res: Response) => {
+router.get('/weekly-active-users', async (req: Request, res: Response) => {
   try {
     const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
-    const data = usageController.getWeeklyActiveUsers(timeframe);
+    const data = await usageController.getWeeklyActiveUsers(timeframe);
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Invalid timeframe parameter' });
@@ -103,10 +119,10 @@ router.get('/weekly-active-users', (req: Request, res: Response) => {
  *       200:
  *         description: Average chat requests per user data points
  */
-router.get('/avg-chat-requests', (req: Request, res: Response) => {
+router.get('/avg-chat-requests', async (req: Request, res: Response) => {
   try {
     const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
-    const data = usageController.getAverageChatRequestsPerUser(timeframe);
+    const data = await usageController.getAverageChatRequestsPerUser(timeframe);
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Invalid timeframe parameter' });
@@ -130,10 +146,10 @@ router.get('/avg-chat-requests', (req: Request, res: Response) => {
  *       200:
  *         description: Chat mode requests stacked data
  */
-router.get('/chat-mode-requests', (req: Request, res: Response) => {
+router.get('/chat-mode-requests', async (req: Request, res: Response) => {
   try {
     const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
-    const data = usageController.getChatModeRequests(timeframe);
+    const data = await usageController.getChatModeRequests(timeframe);
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Invalid timeframe parameter' });
@@ -157,10 +173,10 @@ router.get('/chat-mode-requests', (req: Request, res: Response) => {
  *       200:
  *         description: Code generation statistics
  */
-router.get('/code-generation', (req: Request, res: Response) => {
+router.get('/code-generation', async (req: Request, res: Response) => {
   try {
     const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
-    const data = usageController.getCodeGenerationStats(timeframe);
+    const data = await usageController.getCodeGenerationStats(timeframe);
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Invalid timeframe parameter' });
@@ -194,12 +210,12 @@ router.get('/code-generation', (req: Request, res: Response) => {
  *       200:
  *         description: User usage details with pagination
  */
-router.get('/user-details', (req: Request, res: Response) => {
+router.get('/user-details', async (req: Request, res: Response) => {
   try {
     const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
     const page = parseInt(req.query.page as string) || 1;
     const limit = parseInt(req.query.limit as string) || 50;
-    const data = usageController.getUserUsageDetails(timeframe, page, limit);
+    const data = await usageController.getUserUsageDetails(timeframe, page, limit);
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Invalid parameters' });
@@ -230,6 +246,337 @@ router.get('/ide-usage', (req: Request, res: Response) => {
     res.json(data);
   } catch (error) {
     res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/ide-weekly-active-users:
+ *   get:
+ *     summary: Get IDE weekly active users breakdown
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *     responses:
+ *       200:
+ *         description: IDE weekly active users data
+ */
+router.get('/ide-weekly-active-users', (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = usageController.getIDEWeeklyActiveUsers(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/model-distribution:
+ *   get:
+ *     summary: Get model usage distribution for donut chart
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *     responses:
+ *       200:
+ *         description: Model usage distribution with percentages
+ */
+router.get('/model-distribution', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getModelUsageDistribution(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/model-usage-per-day:
+ *   get:
+ *     summary: Get daily model usage for multi-line chart
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *     responses:
+ *       200:
+ *         description: Daily model usage data
+ */
+router.get('/model-usage-per-day', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getModelUsagePerDay(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/model-usage-per-language:
+ *   get:
+ *     summary: Get model usage per programming language
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *     responses:
+ *       200:
+ *         description: Model usage by language
+ */
+router.get('/model-usage-per-language', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getModelUsagePerLanguage(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/model-usage-per-chat-mode:
+ *   get:
+ *     summary: Get model usage per chat mode
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *     responses:
+ *       200:
+ *         description: Model usage by chat mode
+ */
+router.get('/model-usage-per-chat-mode', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getModelUsagePerChatMode(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/code-completions:
+ *   get:
+ *     summary: Get code completions (suggested vs accepted) data
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *     responses:
+ *       200:
+ *         description: Daily code completions data
+ */
+router.get('/code-completions', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getCodeCompletions(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/acceptance-rate:
+ *   get:
+ *     summary: Get code completions acceptance rate over time
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28]
+ *           default: 28
+ *     responses:
+ *       200:
+ *         description: Daily acceptance rate data
+ */
+router.get('/acceptance-rate', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getAcceptanceRate(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+// Code Generation LOC endpoints
+router.get('/code-gen-summary', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getCodeGenSummary(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+router.get('/daily-lines', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getDailyLines(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+router.get('/user-code-changes-by-mode', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getUserCodeChangesByMode(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+router.get('/agent-code-changes', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getAgentCodeChanges(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+router.get('/user-code-changes-by-model', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getUserCodeChangesByModel(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+router.get('/agent-code-changes-by-model', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getAgentCodeChangesByModel(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+router.get('/user-code-changes-by-language', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getUserCodeChangesByLanguage(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+router.get('/agent-code-changes-by-language', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getAgentCodeChangesByLanguage(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/upload:
+ *   post:
+ *     summary: Upload a JSON/NDJSON file for analysis
+ *     tags: [Usage]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         multipart/form-data:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               file:
+ *                 type: string
+ *                 format: binary
+ *     responses:
+ *       200:
+ *         description: File uploaded and processed successfully
+ *       400:
+ *         description: Invalid file or processing error
+ */
+router.post('/upload', upload.single('file'), async (req: Request, res: Response) => {
+  try {
+    if (!req.file) {
+      res.status(400).json({ success: false, message: 'No file uploaded' });
+      return;
+    }
+
+    const result = await usageController.processUploadedFile(req.file.buffer, req.file.originalname);
+    res.json(result);
+  } catch (error) {
+    res.status(400).json({ 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Failed to process file' 
+    });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/clear:
+ *   delete:
+ *     summary: Clear all data from the database
+ *     tags: [Usage]
+ *     responses:
+ *       200:
+ *         description: Data cleared successfully
+ */
+router.delete('/clear', (req: Request, res: Response) => {
+  try {
+    usageController.clearAllData();
+    res.json({ success: true, message: 'All data cleared successfully' });
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      message: error instanceof Error ? error.message : 'Failed to clear data' 
+    });
   }
 });
 

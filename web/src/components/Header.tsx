@@ -45,7 +45,14 @@ export function Header() {
     <header className="bg-white dark:bg-dark-bgSecondary border-b border-github-border dark:border-dark-border transition-colors duration-200">
       {/* Top bar with project name and publisher link */}
       <div className="flex items-center justify-between px-4 py-2 border-b border-github-borderLight dark:border-dark-border">
-        <span className="text-sm font-medium text-github-text dark:text-dark-text">GitHub Copilot Usage Extended Insights</span>
+        <a 
+          href="https://github.com/benarch/Github-Copilot-Usage-Extended-Insights" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="text-sm font-medium text-github-text dark:text-dark-text hover:underline"
+        >
+          Go to project repository page
+        </a>
         <a 
           href="https://github.com/benarch" 
           target="_blank" 
@@ -63,14 +70,7 @@ export function Header() {
             <Menu size={18} />
           </button>
           <GitHubLogo className="w-8 h-8 text-github-text dark:text-dark-text" />
-          <a 
-            href="https://github.com/benarch/Github-Copilot-Usage-Extended-Insights" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-sm font-semibold text-github-text dark:text-dark-text hover:underline"
-          >
-            Go to project repository page
-          </a>
+          <span className="text-sm font-semibold text-github-text dark:text-dark-text">GitHub Copilot Usage Extended Insights</span>
         </div>
         
         <div className="flex items-center gap-3">
