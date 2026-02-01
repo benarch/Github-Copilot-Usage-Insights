@@ -1,7 +1,7 @@
 import { z } from 'zod';
 
 // Zod schemas for validation
-export const TimeframeSchema = z.enum(['7', '14', '28']);
+export const TimeframeSchema = z.enum(['7', '14', '28', '90']);
 export type Timeframe = z.infer<typeof TimeframeSchema>;
 
 export const DailyUsageSchema = z.object({

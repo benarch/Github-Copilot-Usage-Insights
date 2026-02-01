@@ -29,34 +29,62 @@ import type { Timeframe } from '@/types';
 
 // Model usage per day colors - matching actual model names from API
 const MODEL_USAGE_COLORS: Record<string, { color: string; dashed: boolean }> = {
+  // Claude models - purple/indigo tones
+  'claude-4.5-sonnet': { color: '#8b5cf6', dashed: false },    // Purple solid (most used)
+  'claude-opus-4.5': { color: '#7c3aed', dashed: false },      // Violet solid
   'claude-4.0-sonnet': { color: '#6366f1', dashed: true },     // Indigo dashed
-  'claude-4.5-sonnet': { color: '#8b5cf6', dashed: false },    // Purple solid
-  'claude-3.5-sonnet': { color: '#a78bfa', dashed: true },     // Light purple dashed
-  'claude-4.5-haiku': { color: '#c4b5fd', dashed: false },     // Lavender solid
-  'gpt-4.1': { color: '#22c55e', dashed: false },              // Green solid
-  'gpt-4o': { color: '#16a34a', dashed: true },                // Dark green dashed
-  'gpt-4o-mini': { color: '#4ade80', dashed: false },          // Light green solid
-  'gpt-5.0': { color: '#2dd4bf', dashed: true },               // Teal dashed
-  'gpt-5.1': { color: '#14b8a6', dashed: false },              // Darker teal solid
+  'claude-4.5-haiku': { color: '#a78bfa', dashed: false },     // Light purple solid
+  'claude-opus-4.1': { color: '#c4b5fd', dashed: true },       // Lavender dashed
+  // GPT models - green/teal tones
+  'gpt-5.2': { color: '#22c55e', dashed: false },              // Green solid
+  'gpt-4.1': { color: '#16a34a', dashed: false },              // Dark green solid
+  'gpt-5.2-codex': { color: '#059669', dashed: true },         // Emerald dashed
+  'gpt-5.0': { color: '#2dd4bf', dashed: false },              // Teal solid
+  'gpt-5.1-codex-max': { color: '#14b8a6', dashed: true },     // Darker teal dashed
+  'gpt-5.1-codex': { color: '#0d9488', dashed: false },        // Teal solid
+  'gpt-5.1': { color: '#0f766e', dashed: true },               // Dark teal dashed
+  'gpt-5-codex': { color: '#115e59', dashed: false },          // Very dark teal solid
   'gpt-5-mini': { color: '#5eead4', dashed: true },            // Light teal dashed
-  'gpt-5-codex': { color: '#f59e0b', dashed: false },          // Amber solid
-  'gpt-5.1-codex': { color: '#fbbf24', dashed: true },         // Yellow dashed
+  'gpt-4o': { color: '#4ade80', dashed: false },               // Light green solid
+  'gpt-4o-mini': { color: '#86efac', dashed: true },           // Very light green dashed
+  'gpt-5.1-codex-mini': { color: '#a7f3d0', dashed: false },   // Mint solid
+  // Gemini models - amber/orange tones
+  'gemini-3.0-pro': { color: '#f59e0b', dashed: false },       // Amber solid
+  'gemini-2.5-pro': { color: '#d97706', dashed: true },        // Dark amber dashed
+  'gemini-3.0-flash': { color: '#fbbf24', dashed: false },     // Yellow solid
+  // Other models
+  'auto': { color: '#64748b', dashed: true },                  // Slate dashed
+  'grok-code-fast-1': { color: '#ec4899', dashed: false },     // Pink solid
 };
 
 // Model colors for language stacked bar chart (orange/brown tones like GitHub)
 const MODEL_LANGUAGE_COLORS: Record<string, string> = {
-  'claude-4.0-sonnet': '#5c3d2e',     // Dark brown
-  'claude-4.5-sonnet': '#92400e',     // Brown
-  'claude-3.5-sonnet': '#b45309',     // Dark orange
-  'claude-4.5-haiku': '#d97706',      // Orange
+  // Claude models
+  'claude-4.5-sonnet': '#5c3d2e',     // Dark brown (most used)
+  'claude-opus-4.5': '#78350f',       // Darker brown
+  'claude-4.0-sonnet': '#92400e',     // Brown
+  'claude-4.5-haiku': '#a16207',      // Dark amber
+  'claude-opus-4.1': '#b45309',       // Dark orange
+  // GPT models
+  'gpt-5.2': '#d97706',               // Orange
   'gpt-4.1': '#ea580c',               // Bright orange
-  'gpt-4o': '#f97316',                // Light orange
-  'gpt-4o-mini': '#fb923c',           // Lighter orange
-  'gpt-5.0': '#fdba74',               // Pale orange
-  'gpt-5.1': '#fed7aa',               // Very pale orange
-  'gpt-5-mini': '#fef3c7',            // Cream
-  'gpt-5-codex': '#fde68a',           // Light yellow
-  'gpt-5.1-codex': '#fef9c3',         // Very light yellow
+  'gpt-5.2-codex': '#dc2626',         // Red
+  'gpt-5.0': '#e11d48',               // Rose
+  'gpt-5.1-codex-max': '#f97316',     // Light orange
+  'gpt-5.1-codex': '#fb923c',         // Lighter orange
+  'gpt-5.1': '#fbbf24',               // Amber
+  'gpt-5-codex': '#fcd34d',           // Yellow
+  'gpt-5-mini': '#fde047',            // Light yellow
+  'gpt-4o': '#fdba74',                // Pale orange
+  'gpt-4o-mini': '#fed7aa',           // Very pale orange
+  'gpt-5.1-codex-mini': '#fef3c7',    // Cream
+  // Gemini models
+  'gemini-3.0-pro': '#0891b2',        // Cyan
+  'gemini-2.5-pro': '#06b6d4',        // Light cyan
+  'gemini-3.0-flash': '#22d3ee',      // Lighter cyan
+  // Other models
+  'auto': '#64748b',                  // Slate
+  'grok-code-fast-1': '#f472b6',      // Pink
 };
 
 // Chat mode colors - green scheme for requests per chat mode

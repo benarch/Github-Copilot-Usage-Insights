@@ -52,6 +52,7 @@ export function TableViewPage() {
     { value: '7', label: `Last 7 days (${formatDateRange(7)})` },
     { value: '14', label: `Last 14 days (${formatDateRange(14)})` },
     { value: '28', label: `Last 28 days (${formatDateRange(28)})` },
+    { value: '90', label: `Last 3 months (${formatDateRange(90)})` },
   ];
 
   const interactionModeOptions = [

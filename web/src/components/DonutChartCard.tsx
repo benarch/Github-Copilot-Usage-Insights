@@ -84,50 +84,45 @@ export function DonutChartCard({
   return (
     <div className="bg-white dark:bg-dark-bgSecondary border border-github-border dark:border-dark-border rounded-lg p-4 hover:shadow-cardHover dark:hover:shadow-dark-card transition-shadow">
       <h3 className="text-base font-semibold text-github-text dark:text-dark-text mb-1">{title}</h3>
-      <p className="text-xs text-github-textSecondary dark:text-dark-textSecondary mb-4">{subtitle}</p>
+      <p className="text-xs text-github-textSecondary dark:text-dark-textSecondary mb-3">{subtitle}</p>
       
-      <div className="flex items-center gap-6">
-        {/* Chart */}
-        <div className="h-64 w-64 flex-shrink-0">
-          <ResponsiveContainer width="100%" height="100%">
-            <PieChart>
-              <Pie
-                data={data}
-                cx="50%"
-                cy="50%"
-                innerRadius={60}
-                outerRadius={100}
-                paddingAngle={2}
-                dataKey="value"
-                stroke={isDark ? '#0d1117' : '#ffffff'}
-                strokeWidth={2}
-              >
-                {data.map((_, index) => (
-                  <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
-                ))}
-              </Pie>
-              <Tooltip content={<CustomTooltip />} />
-            </PieChart>
-          </ResponsiveContainer>
-        </div>
+      {/* Legend at top - compact style matching other charts */}
+      <div className="flex flex-wrap gap-x-3 gap-y-1.5 mb-3 max-h-20 overflow-y-auto">
+        {data.map((entry, index) => (
+          <div key={entry.name} className="flex items-center gap-1.5">
+            <span 
+              className="w-2.5 h-2.5 rounded-sm flex-shrink-0" 
+              style={{ backgroundColor: colors[index % colors.length] }}
+            />
+            <span className="text-xs text-github-textSecondary dark:text-dark-textSecondary whitespace-nowrap">
+              {entry.name} ({entry.percentage.toFixed(1)}%)
+            </span>
+          </div>
+        ))}
+      </div>
 
-        {/* Legend */}
-        <div className="flex flex-col gap-2">
-          {data.map((entry, index) => (
-            <div key={entry.name} className="flex items-center gap-3">
-              <span 
-                className="w-3 h-3 rounded-sm flex-shrink-0" 
-                style={{ backgroundColor: colors[index % colors.length] }}
-              />
-              <span className="text-sm text-github-text dark:text-dark-text min-w-[120px]">
-                {entry.name}
-              </span>
-              <span className="text-sm font-medium text-github-text dark:text-dark-text">
-                {entry.percentage.toFixed(1)}%
-              </span>
-            </div>
-          ))}
-        </div>
+      {/* Chart - centered and sized to fit */}
+      <div className="h-56 flex justify-center">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie
+              data={data}
+              cx="50%"
+              cy="50%"
+              innerRadius={55}
+              outerRadius={95}
+              paddingAngle={1}
+              dataKey="value"
+              stroke={isDark ? '#0d1117' : '#ffffff'}
+              strokeWidth={2}
+            >
+              {data.map((_, index) => (
+                <Cell key={`cell-${index}`} fill={colors[index % colors.length]} />
+              ))}
+            </Pie>
+            <Tooltip content={<CustomTooltip />} />
+          </PieChart>
+        </ResponsiveContainer>
       </div>
     </div>
   );

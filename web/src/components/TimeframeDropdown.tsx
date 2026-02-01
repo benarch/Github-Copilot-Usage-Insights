@@ -11,6 +11,7 @@ const options: { value: Timeframe; label: string }[] = [
   { value: '7', label: 'Last 7 days' },
   { value: '14', label: 'Last 14 days' },
   { value: '28', label: 'Last 28 days' },
+  { value: '90', label: 'Last 3 months' },
 ];
 
 export function TimeframeDropdown({ value, onChange }: TimeframeDropdownProps) {

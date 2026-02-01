@@ -1,4 +1,4 @@
-export type Timeframe = '7' | '14' | '28';
+export type Timeframe = '7' | '14' | '28' | '90';
 
 export interface DashboardSummary {
   ideActiveUsers: number;

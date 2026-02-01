@@ -81,6 +81,7 @@ export function SummaryReportPage() {
     { value: '7', label: 'Last 7 days', range: formatDateRange(7).label },
     { value: '14', label: 'Last 14 days', range: formatDateRange(14).label },
     { value: '28', label: 'Last 28 days', range: formatDateRange(28).label },
+    { value: '90', label: 'Last 3 months', range: formatDateRange(90).label },
   ];
 
   const currentRange = formatDateRange(parseInt(timeframe));

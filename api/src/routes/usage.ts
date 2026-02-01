@@ -31,7 +31,7 @@ const upload = multer({
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *         description: Number of days to include
  *     responses:
@@ -59,7 +59,7 @@ router.get('/summary', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -86,7 +86,7 @@ router.get('/daily-active-users', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -113,7 +113,7 @@ router.get('/weekly-active-users', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -140,7 +140,7 @@ router.get('/avg-chat-requests', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -167,7 +167,7 @@ router.get('/chat-mode-requests', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -194,7 +194,7 @@ router.get('/code-generation', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *       - in: query
  *         name: page
@@ -234,7 +234,7 @@ router.get('/user-details', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -261,7 +261,7 @@ router.get('/ide-usage', (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -288,7 +288,7 @@ router.get('/ide-weekly-active-users', (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -315,7 +315,7 @@ router.get('/model-distribution', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -342,7 +342,7 @@ router.get('/model-usage-per-day', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -369,7 +369,7 @@ router.get('/model-usage-per-language', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -396,7 +396,7 @@ router.get('/model-usage-per-chat-mode', async (req: Request, res: Response) => 
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
@@ -423,7 +423,7 @@ router.get('/code-completions', async (req: Request, res: Response) => {
  *         name: timeframe
  *         schema:
  *           type: string
- *           enum: [7, 14, 28]
+ *           enum: [7, 14, 28, 90]
  *           default: 28
  *     responses:
  *       200:
