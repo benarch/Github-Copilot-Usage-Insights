@@ -9,6 +9,7 @@ const insightsSidebarItems = [
 const tableViewSidebarItems = [
   { icon: FileText, label: 'Summary Report', href: '/table-view/summary' },
   { icon: Table, label: 'Detailed Report', href: '/table-view/detailed' },
+  { icon: Users2, label: 'Teams View', href: '/table-view/teams' },
 ];
 
 const peopleSidebarItems = [

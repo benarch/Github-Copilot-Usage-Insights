@@ -18,7 +18,9 @@ import {
   Zap,
   Shield,
   Clock,
-  CheckCircle2
+  CheckCircle2,
+  Users2,
+  Building2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
@@ -48,6 +50,40 @@ export function OverviewPage() {
         </div>
       </div>
 
+      {/* Teams Feature Banner */}
+      <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-900/20 dark:to-indigo-900/20 border border-purple-200 dark:border-purple-800 rounded-xl p-5">
+        <div className="flex items-start gap-4">
+          <div className="p-2 bg-purple-100 dark:bg-purple-900/40 rounded-lg">
+            <Users2 className="w-6 h-6 text-purple-600 dark:text-purple-400" />
+          </div>
+          <div className="flex-1">
+            <h3 className="font-semibold text-purple-900 dark:text-purple-200 mb-1">
+              New: Team-Level Analytics
+            </h3>
+            <p className="text-sm text-purple-700 dark:text-purple-300 mb-3">
+              For better visibility into team-level Copilot usage, import your team assignments using the Teams import feature. 
+              View aggregated metrics like total code generated, acceptances, and LOC changes per team.
+            </p>
+            <div className="flex flex-wrap gap-2">
+              <Link 
+                to="/teams" 
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-600 text-white text-sm rounded-md hover:bg-purple-700 transition-colors"
+              >
+                <Upload className="w-4 h-4" />
+                Import Teams
+              </Link>
+              <Link 
+                to="/table-view/teams" 
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white dark:bg-dark-bg text-purple-700 dark:text-purple-300 text-sm rounded-md border border-purple-300 dark:border-purple-700 hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors"
+              >
+                <Table className="w-4 h-4" />
+                Teams View
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+
       {/* Key Features Grid */}
       <div>
         <h2 className="text-xl font-semibold text-github-text dark:text-dark-text mb-4 flex items-center gap-2">
@@ -74,6 +110,11 @@ export function OverviewPage() {
             icon={<Users className="w-6 h-6 text-orange-500" />}
             title="User-Level Insights"
             description="Browse individual user activity, IDEs used, and engagement metrics in the People tab."
+          />
+          <FeatureCard 
+            icon={<Users2 className="w-6 h-6 text-purple-500" />}
+            title="Team-Level Analytics"
+            description="Import team assignments to see aggregated Copilot metrics by team. View in Table View → Teams View."
           />
           <FeatureCard 
             icon={<Bot className="w-6 h-6 text-indigo-500" />}
@@ -145,6 +186,19 @@ export function OverviewPage() {
               "Ask about top users, IDE statistics, language usage, and more",
               "Search for specific users by name",
               "The chatbot queries your actual uploaded data"
+            ]}
+          />
+
+          {/* Teams Import */}
+          <HowToSection
+            icon={<Users2 className="w-5 h-5 text-purple-500" />}
+            title="Team-Level Visibility"
+            steps={[
+              "Navigate to the Teams tab in the navigation header",
+              "Click 'Import CSV' or 'Import JSON' to upload your user-team mappings",
+              "Include 'login', 'teams', and optionally 'organizations' columns in your file",
+              "Once imported, view aggregated team metrics in Table View → Teams View",
+              "Team assignments persist in your browser for future sessions"
             ]}
           />
 

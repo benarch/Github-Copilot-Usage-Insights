@@ -9,6 +9,7 @@ import { PeoplePage } from '@/pages/PeoplePage';
 import { TeamsPage } from '@/pages/TeamsPage';
 import { UsersInTeamsPage } from '@/pages/UsersInTeamsPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
+import { TeamsViewPage } from '@/pages/TeamsViewPage';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NavCountsProvider } from '@/contexts/NavCountsContext';
 import { ImportDataProvider } from '@/contexts/ImportDataContext';
@@ -34,6 +35,7 @@ function App() {
             <Route path="/table-view" element={<Navigate to="/table-view/summary" replace />} />
             <Route path="/table-view/summary" element={<SummaryReportPage />} />
             <Route path="/table-view/detailed" element={<TableViewPage />} />
+            <Route path="/table-view/teams" element={<TeamsViewPage />} />
           </Routes>
         </Layout>
         <ChatbotContainer />
