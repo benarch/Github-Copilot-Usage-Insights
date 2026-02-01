@@ -121,6 +121,41 @@ docker compose down
 
 ---
 
+## Importing Data
+
+### Copilot Usage Data (Insights Tab)
+
+Import your GitHub Copilot usage data from the native GitHub Copilot usage dashboard:
+
+1. **Export from GitHub:** Go to your organization's GitHub Copilot usage page and use the **Export** option to download usage data
+2. **Navigate to Insights tab** in this dashboard
+3. **Upload file** using the upload button
+4. **Supported formats:**
+   - **JSON** - Standard JSON array format
+   - **NDJSON** - Newline-delimited JSON (one record per line)
+
+The uploaded data will populate all dashboard views with your organization's Copilot usage metrics.
+
+### Users, Teams & Organizations (Teams Tab)
+
+Import organizational structure from GitHub Enterprise to enable team-level analytics:
+
+1. **Export from GitHub Enterprise:** Use the [github-users-teams-export](https://github.com/benarch/github-users-teams-export) tool to export users, teams, and organizations
+2. **Navigate to Teams tab** in this dashboard
+3. **Upload file** using the import button
+4. **Supported formats:**
+   - **JSON** - Standard JSON array format
+   - **NDJSON** - Newline-delimited JSON (one record per line)
+   - **CSV** - Comma-separated values with header row
+
+Once imported, you can:
+- View aggregated Copilot usage by team
+- Drill into nested team hierarchies
+- See organization-level metrics
+- Link individual users to their team membership
+
+---
+
 ## Architecture & Flow Diagrams
 
 ### Data Import & Application Flow
