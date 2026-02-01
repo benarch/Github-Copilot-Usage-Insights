@@ -90,6 +90,24 @@ npm run docker:down
 - **Code Generation Stats**: View suggestion counts and acceptance rates
 - **Responsive Design**: Works on desktop and tablet
 
+## Related Tools
+
+### GitHub Users, Teams & Organizations Exporter
+**[github-users-teams-export](https://github.com/benarch/github-users-teams-export)**
+
+A companion tool that exports GitHub users, teams, and organizations data. Use this to:
+- Import users into the **Teams** tab for team-level analytics
+- Add extended visibility on users, team membership, and nested team/organization membership
+- Map Copilot usage data to organizational structure
+
+### GitHub Copilot Usage Anonymizer
+**[github-copilot-usage-anonymizer](https://github.com/benarch/github-copilot-usage-anonymizer)**
+
+A data anonymization tool used to generate the demo data in this project. It:
+- Anonymizes Copilot usage data by replacing real user names with generated names
+- Preserves data structure and relationships while protecting privacy
+- Enables safe sharing and demonstration of Copilot analytics without exposing actual user identities
+
 ## API Endpoints
 
 | Endpoint | Description |
