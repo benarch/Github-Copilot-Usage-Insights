@@ -108,6 +108,7 @@ export interface ModelUsagePerChatMode {
   agent: number;
   custom: number;
   inline: number;
+  [key: string]: string | number; // Index signature for dynamic access
 }
 
 // Code completions data for dual-line chart
@@ -115,6 +116,7 @@ export interface CodeCompletionsDataPoint {
   date: string;
   suggested: number;
   accepted: number;
+  [key: string]: string | number;
 }
 
 // Code completions acceptance rate

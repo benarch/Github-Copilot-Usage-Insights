@@ -6,7 +6,6 @@ import {
   Trash2, 
   Bot, 
   Moon, 
-  Sun,
   MessageSquare,
   Code,
   TrendingUp,
@@ -17,10 +16,8 @@ import {
   PieChart,
   Zap,
   Shield,
-  Clock,
   CheckCircle2,
-  Users2,
-  Building2
+  Users2
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 

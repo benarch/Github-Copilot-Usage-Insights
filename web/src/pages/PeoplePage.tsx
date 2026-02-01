@@ -10,7 +10,7 @@ export function PeoplePage() {
   const initialSearch = searchParams.get('search') || '';
   const [searchQuery, setSearchQuery] = useState(initialSearch);
   const [searchInput, setSearchInput] = useState(initialSearch);
-  const { users: importedUsers, getUserTeamInfo } = useImportData();
+  const { users: importedUsers } = useImportData();
   const limit = 25;
 
   // Create maps for correlation by login and by id

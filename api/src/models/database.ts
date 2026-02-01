@@ -1,12 +1,24 @@
 import Database from 'better-sqlite3';
 import path from 'path';
+import fs from 'fs';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export function createDatabase(inMemory = false): Database.Database {
-  const dbPath = inMemory ? ':memory:' : path.join(__dirname, '../data/app.db');
+  const dbPath = inMemory 
+    ? ':memory:' 
+    : process.env.DB_PATH || path.join(__dirname, '../data/app.db');
+  
+  // Ensure directory exists
+  if (dbPath !== ':memory:') {
+    const dir = path.dirname(dbPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+  }
+  
   const db = new Database(dbPath);
   
   // Enable WAL mode for better performance

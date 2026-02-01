@@ -36,6 +36,7 @@ EXPOSE 3001
 # Set environment variables
 ENV NODE_ENV=production
 ENV PORT=3001
+ENV DB_PATH=/app/data/app.db
 
 # Start the server
 CMD ["node", "dist/index.js"]

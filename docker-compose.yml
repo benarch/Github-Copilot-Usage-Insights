@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   api:
     build:
@@ -26,7 +24,7 @@ services:
       dockerfile: Dockerfile
     container_name: copilot-insights-web
     ports:
-      - "80:80"
+      - "3010:80"
     depends_on:
       - api
     restart: unless-stopped

@@ -74,9 +74,15 @@ A data anonymization tool used to generate the demo data in this project. It:
 
 ---
 
-## Quick Start
+## Getting Started
+
+### Local Development
 
 ```bash
+# Clone the repository
+git clone https://github.com/benarch/github-copilot-usage-extended.git
+cd github-copilot-usage-extended
+
 # Install dependencies
 npm run install:all
 
@@ -90,6 +96,28 @@ npm run dev
 - **Frontend:** http://localhost:3000
 - **API:** http://localhost:3001
 - **API Docs:** http://localhost:3001/api-docs
+
+### Docker Deployment
+
+```bash
+# Build and start containers
+docker compose up -d --build
+
+# Or run in foreground to see logs
+docker compose up --build
+```
+
+- **Web Dashboard:** http://localhost:3010
+- **API:** http://localhost:3001
+
+### Stopping the Application
+
+```bash
+# Stop Docker containers
+docker compose down
+
+# Stop local development (press Ctrl+C in terminal)
+```
 
 ---
 

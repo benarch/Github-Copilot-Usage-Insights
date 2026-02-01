@@ -311,7 +311,7 @@ export function SummaryReportPage() {
                         name="users"
                         radius={[4, 4, 0, 0]}
                       >
-                        {processedIDEUsage.map((entry, index) => (
+                        {processedIDEUsage.map((_, index) => (
                           <Cell 
                             key={`cell-${index}`} 
                             fill={ideColors[index % ideColors.length]}
