@@ -60,6 +60,8 @@ A data anonymization tool used to generate the demo data in this project. It:
 ![Model Usage](assets/copilot-usage.png)
 *Model usage per day, chat model distribution, and model usage per chat mode breakdown*
 
+> **📸 Want to see all dashboard views?** Check out the complete screenshots gallery in [app-screenshots/README.md](app-screenshots/README.md)
+
 ---
 
 ## Tech Stack
