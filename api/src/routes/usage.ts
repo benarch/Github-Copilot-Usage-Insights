@@ -689,4 +689,100 @@ router.get('/export', (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @openapi
+ * /api/usage/github/sync:
+ *   post:
+ *     summary: Sync data from GitHub Copilot Metrics API
+ *     tags: [GitHub Integration]
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               since:
+ *                 type: string
+ *                 format: date
+ *                 description: Start date for sync (ISO 8601 format)
+ *               until:
+ *                 type: string
+ *                 format: date
+ *                 description: End date for sync (ISO 8601 format)
+ *               clearExisting:
+ *                 type: boolean
+ *                 description: Clear existing GitHub API data before sync
+ *     responses:
+ *       200:
+ *         description: Sync completed successfully
+ *       400:
+ *         description: Sync failed
+ */
+router.post('/github/sync', async (req: Request, res: Response) => {
+  try {
+    const { since, until, clearExisting } = req.body;
+    const result = await usageController.syncDataFromGitHub({ since, until, clearExisting });
+    
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to sync data'
+    });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/github/status:
+ *   get:
+ *     summary: Get GitHub API sync status
+ *     tags: [GitHub Integration]
+ *     responses:
+ *       200:
+ *         description: GitHub sync status information
+ */
+router.get('/github/status', (req: Request, res: Response) => {
+  try {
+    const status = usageController.getGitHubSyncStatus();
+    res.json(status);
+  } catch (error) {
+    res.status(500).json({
+      error: 'Failed to get GitHub sync status'
+    });
+  }
+});
+
+/**
+ * @openapi
+ * /api/usage/github/test-connection:
+ *   get:
+ *     summary: Test GitHub API connection
+ *     tags: [GitHub Integration]
+ *     responses:
+ *       200:
+ *         description: Connection test result
+ */
+router.get('/github/test-connection', async (req: Request, res: Response) => {
+  try {
+    const result = await usageController.testGitHubConnection();
+    
+    if (result.success) {
+      res.json(result);
+    } else {
+      res.status(400).json(result);
+    }
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      message: error instanceof Error ? error.message : 'Failed to test connection'
+    });
+  }
+});
+
 export default router;

@@ -125,6 +125,49 @@ docker compose down
 
 ### Copilot Usage Data (Insights Tab)
 
+You have two options to import GitHub Copilot usage data:
+
+#### Option 1: Direct API Integration (Recommended) 🔄
+
+Fetch data automatically from GitHub's Copilot Metrics API:
+
+**Requirements:**
+- GitHub Personal Access Token (PAT) or GitHub App with `copilot` scope
+- Organization admin access to view Copilot metrics
+- Enterprise or Organization with GitHub Copilot enabled
+
+**Setup Instructions:**
+1. **Create a Personal Access Token:**
+   - Go to GitHub → Settings → Developer settings → Personal access tokens → Fine-grained tokens
+   - Generate new token with the following permissions:
+     - **Organization permissions:** Copilot (read)
+     - Select your organization
+   - Or use a GitHub App with the `organization_copilot_seat_management:read` permission
+2. **Configure the application:**
+   - Set environment variable: `GITHUB_TOKEN=your_token_here`
+   - Set organization name: `GITHUB_ORG=your_org_name`
+3. **Sync data:**
+   - Navigate to the Settings/Configuration page in the dashboard
+   - Click "Sync from GitHub API" button
+   - Or use the API endpoint: `POST /api/usage/sync-from-github`
+
+**Benefits:**
+- ✅ Real-time or near real-time data access
+- ✅ Automated data refresh (scheduled sync capability)
+- ✅ Eliminates manual export/import process
+- ✅ Always up-to-date metrics
+- ✅ Supports incremental updates
+- ✅ No file handling required
+
+**Disadvantages:**
+- ❌ Requires GitHub API token with appropriate permissions
+- ❌ Subject to GitHub API rate limits (5,000 requests/hour)
+- ❌ Needs network connectivity to GitHub
+- ❌ Additional security considerations for token storage
+- ❌ Only works with GitHub Enterprise Cloud (not available for GitHub.com individual accounts)
+
+#### Option 2: Manual File Import
+
 Import your GitHub Copilot usage data from the native GitHub Copilot usage dashboard:
 
 1. **Export from GitHub:** Go to your organization's GitHub Copilot usage page and use the **Export** option to download usage data
@@ -133,6 +176,18 @@ Import your GitHub Copilot usage data from the native GitHub Copilot usage dashb
 4. **Supported formats:**
    - **JSON** - Standard JSON array format
    - **NDJSON** - Newline-delimited JSON (one record per line)
+
+**Benefits:**
+- ✅ No API token required
+- ✅ Works offline
+- ✅ Full control over data
+- ✅ No API rate limits
+
+**Disadvantages:**
+- ❌ Manual process
+- ❌ Data becomes stale over time
+- ❌ Requires repeated exports for updates
+- ❌ File size limitations
 
 The uploaded data will populate all dashboard views with your organization's Copilot usage metrics.
 

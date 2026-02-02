@@ -1551,3 +1551,64 @@ export function getExportData(): ExportDataItem[] {
   
   return rows;
 }
+
+// GitHub API Sync functions
+import { createGitHubApiClient } from '../services/githubApiClient.js';
+import { syncFromGitHub, getLastSyncDate, SyncOptions } from '../services/githubSyncService.js';
+
+export async function syncDataFromGitHub(options: SyncOptions = {}) {
+  const client = createGitHubApiClient();
+  
+  if (!client) {
+    return {
+      success: false,
+      message: 'GitHub API not configured. Please set GITHUB_TOKEN and GITHUB_ORG environment variables.',
+    };
+  }
+
+  return await syncFromGitHub(client, options);
+}
+
+export function getGitHubSyncStatus() {
+  const lastSyncDate = getLastSyncDate();
+  const isConfigured = !!(process.env.GITHUB_TOKEN && process.env.GITHUB_ORG);
+  
+  return {
+    configured: isConfigured,
+    lastSyncDate,
+    organization: process.env.GITHUB_ORG || null,
+  };
+}
+
+export async function testGitHubConnection() {
+  const client = createGitHubApiClient();
+  
+  if (!client) {
+    return {
+      success: false,
+      message: 'GitHub API not configured. Please set GITHUB_TOKEN and GITHUB_ORG environment variables.',
+    };
+  }
+
+  try {
+    const isConnected = await client.testConnection();
+    if (isConnected) {
+      const rateLimit = await client.getRateLimit();
+      return {
+        success: true,
+        message: 'Successfully connected to GitHub API',
+        rateLimit,
+      };
+    } else {
+      return {
+        success: false,
+        message: 'Failed to connect to GitHub API. Please check your token and organization name.',
+      };
+    }
+  } catch (error) {
+    return {
+      success: false,
+      message: error instanceof Error ? error.message : 'Unknown error occurred',
+    };
+  }
+}
