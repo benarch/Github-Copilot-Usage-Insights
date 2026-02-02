@@ -10,6 +10,7 @@ import { TeamsPage } from '@/pages/TeamsPage';
 import { UsersInTeamsPage } from '@/pages/UsersInTeamsPage';
 import { OrganizationsPage } from '@/pages/OrganizationsPage';
 import { TeamsViewPage } from '@/pages/TeamsViewPage';
+import { TeamUsageReportPage } from '@/pages/TeamUsageReportPage';
 import { ThemeProvider } from '@/contexts/ThemeContext';
 import { NavCountsProvider } from '@/contexts/NavCountsContext';
 import { ImportDataProvider } from '@/contexts/ImportDataContext';
@@ -36,6 +37,7 @@ function App() {
             <Route path="/table-view/summary" element={<SummaryReportPage />} />
             <Route path="/table-view/detailed" element={<TableViewPage />} />
             <Route path="/table-view/teams" element={<TeamsViewPage />} />
+            <Route path="/reports/team-usage" element={<TeamUsageReportPage />} />
           </Routes>
         </Layout>
         <ChatbotContainer />
