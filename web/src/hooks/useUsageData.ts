@@ -169,3 +169,10 @@ export function useUsersList(page: number = 1, limit: number = 50, search: strin
     queryFn: () => api.fetchUsersList(page, limit, search),
   });
 }
+
+export function useCopilotSeats(timeframe: Timeframe) {
+  return useQuery({
+    queryKey: ['copilotSeats', timeframe],
+    queryFn: () => api.fetchCopilotSeats(timeframe),
+  });
+}

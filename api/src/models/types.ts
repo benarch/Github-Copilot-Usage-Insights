@@ -120,6 +120,13 @@ export interface AcceptanceRateDataPoint {
   rate: number;
 }
 
+// Copilot seat statistics
+export interface CopilotSeatsStats {
+  totalSeats: number;
+  activeSeats: number;
+  unusedSeats: number;
+}
+
 // NDJSON Data Schemas for ingestion
 export const NDJSONTotalsByIdeSchema = z.object({
   ide: z.string(),

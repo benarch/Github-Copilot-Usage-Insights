@@ -168,3 +168,10 @@ export interface CodeChangesByLanguage {
   added: number;
   deleted: number;
 }
+
+// Copilot seat statistics
+export interface CopilotSeatsStats {
+  totalSeats: number;
+  activeSeats: number;
+  unusedSeats: number;
+}

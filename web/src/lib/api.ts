@@ -19,7 +19,8 @@ import type {
   UserCodeChangesByMode,
   AgentCodeChanges,
   CodeChangesByModel,
-  CodeChangesByLanguage
+  CodeChangesByLanguage,
+  CopilotSeatsStats
 } from '@/types';
 
 const API_BASE = '/api/usage';
@@ -160,6 +161,10 @@ export async function fetchUserCodeChangesByLanguage(timeframe: Timeframe): Prom
 
 export async function fetchAgentCodeChangesByLanguage(timeframe: Timeframe): Promise<CodeChangesByLanguage[]> {
   return fetchJson(`${API_BASE}/agent-code-changes-by-language?timeframe=${timeframe}`);
+}
+
+export async function fetchCopilotSeats(timeframe: Timeframe): Promise<CopilotSeatsStats> {
+  return fetchJson(`${API_BASE}/copilot-seats?timeframe=${timeframe}`);
 }
 
 export async function clearAllData(): Promise<{ success: boolean; message: string }> {

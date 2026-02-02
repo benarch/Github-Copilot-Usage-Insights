@@ -1,8 +1,8 @@
 import { useState } from 'react';
 import { Timeframe } from '@/types';
-import { useSummary, useCodeGeneration, useIDEUsage } from '@/hooks/useUsageData';
+import { useSummary, useCodeGeneration, useIDEUsage, useCopilotSeats } from '@/hooks/useUsageData';
 import { useTheme } from '@/contexts/ThemeContext';
-import { Loader2, Users, Bot, MessageSquare, Code2, CheckCircle, Monitor } from 'lucide-react';
+import { Loader2, Users, Bot, MessageSquare, Code2, CheckCircle, Monitor, CreditCard } from 'lucide-react';
 import {
   BarChart,
   Bar,
@@ -40,8 +40,9 @@ export function SummaryReportPage() {
   const { data: summary, isLoading: summaryLoading } = useSummary(timeframe);
   const { data: codeGen, isLoading: codeGenLoading } = useCodeGeneration(timeframe);
   const { data: ideUsage, isLoading: ideLoading } = useIDEUsage(timeframe);
+  const { data: seatsData, isLoading: seatsLoading } = useCopilotSeats(timeframe);
 
-  const isLoading = summaryLoading || codeGenLoading || ideLoading;
+  const isLoading = summaryLoading || codeGenLoading || ideLoading || seatsLoading;
 
   // Target IDEs to display (with case-insensitive matching patterns)
   const targetIDEs = [
@@ -122,8 +123,51 @@ export function SummaryReportPage() {
         )}
 
         {/* Summary Cards */}
-        {!isLoading && summary && codeGen && ideUsage && (
+        {!isLoading && summary && codeGen && ideUsage && seatsData && (
           <div className="space-y-8">
+            {/* Copilot Seats Section */}
+            <section>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-4 flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-[#58a6ff]" />
+                Copilot Seats
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div className="bg-white dark:bg-dark-bgSecondary border border-gray-200 dark:border-dark-border rounded-lg p-6">
+                  <div className="text-3xl font-bold text-gray-900 dark:text-dark-text">
+                    {seatsData.totalSeats.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-dark-textSecondary mt-1">
+                    Total Seats
+                  </div>
+                  <div className="text-xs text-gray-400 dark:text-dark-textSecondary mt-2">
+                    Total Copilot licenses allocated
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-dark-bgSecondary border border-gray-200 dark:border-dark-border rounded-lg p-6">
+                  <div className="text-3xl font-bold text-[#3fb950]">
+                    {seatsData.activeSeats.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-dark-textSecondary mt-1">
+                    Active Seats
+                  </div>
+                  <div className="text-xs text-gray-400 dark:text-dark-textSecondary mt-2">
+                    Seats with activity in timeframe
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-dark-bgSecondary border border-gray-200 dark:border-dark-border rounded-lg p-6">
+                  <div className="text-3xl font-bold text-[#f85149]">
+                    {seatsData.unusedSeats.toLocaleString()}
+                  </div>
+                  <div className="text-sm text-gray-500 dark:text-dark-textSecondary mt-1">
+                    Unused Seats
+                  </div>
+                  <div className="text-xs text-gray-400 dark:text-dark-textSecondary mt-2">
+                    Seats with no recent activity
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Usage Overview Section */}
             <section>
               <h2 className="text-lg font-semibold text-gray-900 dark:text-dark-text mb-4 flex items-center gap-2">

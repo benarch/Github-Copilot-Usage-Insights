@@ -689,4 +689,32 @@ router.get('/export', (req: Request, res: Response) => {
   }
 });
 
+/**
+ * @openapi
+ * /api/usage/copilot-seats:
+ *   get:
+ *     summary: Get Copilot seat statistics
+ *     tags: [Usage]
+ *     parameters:
+ *       - in: query
+ *         name: timeframe
+ *         schema:
+ *           type: string
+ *           enum: [7, 14, 28, 90]
+ *           default: 28
+ *         description: Number of days to include for active seat calculation
+ *     responses:
+ *       200:
+ *         description: Copilot seat statistics including total, active, and unused seats
+ */
+router.get('/copilot-seats', async (req: Request, res: Response) => {
+  try {
+    const timeframe = TimeframeSchema.parse(req.query.timeframe || '28');
+    const data = await usageController.getCopilotSeatsStats(timeframe);
+    res.json(data);
+  } catch (error) {
+    res.status(400).json({ error: 'Invalid timeframe parameter' });
+  }
+});
+
 export default router;

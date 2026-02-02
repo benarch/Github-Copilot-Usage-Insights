@@ -1551,3 +1551,72 @@ export function getExportData(): ExportDataItem[] {
   
   return rows;
 }
+
+// Get Copilot seat statistics
+export interface CopilotSeatsStats {
+  totalSeats: number;
+  activeSeats: number;
+  unusedSeats: number;
+}
+
+export async function getCopilotSeatsStats(timeframe: Timeframe): Promise<CopilotSeatsStats> {
+  const days = parseInt(timeframe);
+  const { startDate, endDate } = getDateRange(days);
+
+  // Check for direct JSON mode
+  if (await shouldUseDirectJson()) {
+    const records = await jsonReader.getAllRecords();
+    const filtered = jsonReader.filterByDateRange(records, startDate, endDate);
+    
+    // Get unique users from the records
+    const uniqueUsers = new Set<string>();
+    const activeUsers = new Set<string>();
+    
+    for (const record of filtered) {
+      uniqueUsers.add(record.user_login);
+      // Consider a user active if they have any interaction
+      if (record.user_initiated_interaction_count > 0 || 
+          record.code_generation_activity_count > 0 || 
+          record.code_acceptance_activity_count > 0) {
+        activeUsers.add(record.user_login);
+      }
+    }
+    
+    const totalSeats = uniqueUsers.size;
+    const activeSeats = activeUsers.size;
+    
+    return {
+      totalSeats,
+      activeSeats,
+      unusedSeats: totalSeats - activeSeats,
+    };
+  }
+
+  // Use SQLite
+  const db = getDatabase();
+
+  // Get total unique users (total seats allocated)
+  const totalSeatsRow = db.prepare(`
+    SELECT COUNT(DISTINCT user_login) as total
+    FROM user_usage_details
+  `).get() as { total: number } | undefined;
+
+  // Get active users within the timeframe (users with any activity)
+  const activeSeatsRow = db.prepare(`
+    SELECT COUNT(DISTINCT user_login) as active
+    FROM user_usage_details
+    WHERE day BETWEEN ? AND ?
+      AND (user_initiated_interaction_count > 0 
+           OR code_generation_activity_count > 0 
+           OR code_acceptance_activity_count > 0)
+  `).get(startDate, endDate) as { active: number } | undefined;
+
+  const totalSeats = totalSeatsRow?.total || 0;
+  const activeSeats = activeSeatsRow?.active || 0;
+
+  return {
+    totalSeats,
+    activeSeats,
+    unusedSeats: totalSeats - activeSeats,
+  };
+}
