@@ -44,6 +44,10 @@ yarn-error.log*
 # Test coverage
 coverage/
 
+# Playwright
+playwright-report/
+test-results/
+
 # Misc
 *.tgz
 .cache/

@@ -11,6 +11,7 @@ A full-stack analytics dashboard that visualizes GitHub Copilot usage data with 
 
 ### Key features:
 - **Familiar design** - styled to match the native GitHub Copilot usage dashboard for easy adoption
+- **GitHub API Integration** - direct integration with Copilot Metrics API for automated data fetching ([setup guide](GITHUB_API_INTEGRATION.md))
 - Dashboard with interactive charts (Recharts)
 - Table views: Summary, Detailed Report, Query Builder, Teams View
 - **Acceptance rate sorting** - adjust user license/tier by their usage performance
@@ -129,9 +130,11 @@ You have two options to import GitHub Copilot usage data:
 
 #### Option 1: Direct API Integration (Recommended) 🔄
 
-Fetch data automatically from GitHub's Copilot Metrics API:
+Fetch data automatically from GitHub's Copilot Metrics API.
 
-**Requirements:**
+> **📖 Full Setup Guide:** See [GITHUB_API_INTEGRATION.md](GITHUB_API_INTEGRATION.md) for detailed instructions, troubleshooting, and API reference.
+
+**Quick Setup:**
 - GitHub Personal Access Token (PAT) or GitHub App with `copilot` scope
 - Organization admin access to view Copilot metrics
 - Enterprise or Organization with GitHub Copilot enabled
