@@ -1,9 +1,12 @@
 import { test, expect } from '@playwright/test';
 
+// Constants
+const SERVER_STARTUP_WAIT_MS = 3000;
+
 test.describe('GitHub Copilot Metrics API Integration', () => {
   test.beforeAll(async () => {
     // Wait a bit for the servers to be fully ready
-    await new Promise(resolve => setTimeout(resolve, 3000));
+    await new Promise(resolve => setTimeout(resolve, SERVER_STARTUP_WAIT_MS));
   });
 
   test('API should return GitHub sync status', async ({ request }) => {

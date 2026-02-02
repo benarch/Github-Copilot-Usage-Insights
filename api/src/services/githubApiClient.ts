@@ -6,6 +6,9 @@
  * API Reference: https://docs.github.com/en/rest/copilot/copilot-usage
  */
 
+// Constants
+const GITHUB_API_VERSION = '2022-11-28';
+
 export interface CopilotUsageMetrics {
   day: string;
   total_suggestions_count: number;
@@ -77,7 +80,7 @@ export class GitHubApiClient {
         headers: {
           'Accept': 'application/vnd.github+json',
           'Authorization': `Bearer ${this.token}`,
-          'X-GitHub-Api-Version': '2022-11-28',
+          'X-GitHub-Api-Version': GITHUB_API_VERSION,
         },
       });
 
@@ -144,7 +147,7 @@ export class GitHubApiClient {
         headers: {
           'Accept': 'application/vnd.github+json',
           'Authorization': `Bearer ${this.token}`,
-          'X-GitHub-Api-Version': '2022-11-28',
+          'X-GitHub-Api-Version': GITHUB_API_VERSION,
         },
       });
 
@@ -171,7 +174,7 @@ export class GitHubApiClient {
         headers: {
           'Accept': 'application/vnd.github+json',
           'Authorization': `Bearer ${this.token}`,
-          'X-GitHub-Api-Version': '2022-11-28',
+          'X-GitHub-Api-Version': GITHUB_API_VERSION,
         },
       });
 

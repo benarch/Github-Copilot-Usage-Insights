@@ -7,6 +7,13 @@
 import { getDatabase } from '../models/database.js';
 import { GitHubApiClient, CopilotUsageMetrics } from './githubApiClient.js';
 
+// Constants for aggregate data representation
+// These special values are used to store aggregated organization-level metrics from GitHub API
+// which don't include per-user breakdowns like manual exports do
+const AGGREGATE_ENTERPRISE_ID = 'github-api';
+const AGGREGATE_USER_ID = 0;
+const AGGREGATE_USER_LOGIN = '_aggregate';
+
 export interface SyncResult {
   success: boolean;
   message: string;
@@ -30,14 +37,14 @@ function transformGitHubMetricsToUserUsage(metrics: CopilotUsageMetrics): any[] 
   
   const userUsageRecords: any[] = [];
   
-  // Create a synthetic aggregate user record
+  // Create a synthetic aggregate user record using constants
   const baseRecord = {
     day: metrics.day,
     report_start_day: metrics.day,
     report_end_day: metrics.day,
-    enterprise_id: 'github-api',
-    user_id: 0, // Special ID for aggregate data
-    user_login: '_aggregate',
+    enterprise_id: AGGREGATE_ENTERPRISE_ID,
+    user_id: AGGREGATE_USER_ID,
+    user_login: AGGREGATE_USER_LOGIN,
     user_initiated_interaction_count: metrics.total_active_users,
     code_generation_activity_count: metrics.total_suggestions_count,
     code_acceptance_activity_count: metrics.total_acceptances_count,
@@ -144,8 +151,11 @@ export async function syncFromGitHub(
     // Clear existing data if requested
     if (options.clearExisting) {
       const db = getDatabase();
-      db.exec('DELETE FROM user_usage_details WHERE enterprise_id = "github-api"');
-      db.exec('DELETE FROM daily_usage');
+      // Only clear data from GitHub API source to avoid deleting manual imports
+      db.exec(`DELETE FROM user_usage_details WHERE enterprise_id = '${AGGREGATE_ENTERPRISE_ID}'`);
+      db.exec(`DELETE FROM daily_usage WHERE date IN (
+        SELECT DISTINCT day FROM user_usage_details WHERE enterprise_id = '${AGGREGATE_ENTERPRISE_ID}'
+      )`);
     }
 
     // Fetch metrics from GitHub
@@ -185,8 +195,8 @@ export function getLastSyncDate(): string | null {
   const row = db.prepare(`
     SELECT MAX(day) as last_sync_day
     FROM user_usage_details
-    WHERE enterprise_id = 'github-api'
-  `).get() as { last_sync_day: string | null };
+    WHERE enterprise_id = ?
+  `).get(AGGREGATE_ENTERPRISE_ID) as { last_sync_day: string | null };
 
   return row?.last_sync_day || null;
 }
