@@ -1,0 +1,90 @@
+---
+name: Cleanup Old Branches
+
+on:
+  workflow_dispatch:
+
+jobs:
+  cleanup-branches:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Delete old branches
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=============================================================="
+          echo "Branch Cleanup Workflow"
+          echo "=============================================================="
+          echo ""
+          echo "Branches to be deleted:"
+
+          # List of branches to delete
+          branches=(
+            "container"
+            "copilot/add-ai-chatbot-agent"
+            "copilot/add-copilot-seats-view"
+            "copilot/add-github-copilot-integration"
+            "copilot/add-github-export-tool"
+            "copilot/add-team-usage-report-page"
+            "copilot/fix-29985769-1145060471-3d22a403-533a-4231-ba2c-189bc9958005"
+            "copilot/implement-ndjson-ingestion-pipeline"
+            "dependabot/npm_and_yarn/api/npm_and_yarn-aa68fbd092"
+            "feature-4"
+            "feature-chatbot-agent"
+            "feature-code-quality-security"
+            "feature-enhancements"
+            "feature-visual-refinements"
+            "main-1"
+            "test-chat-agent-interactions"
+            "testing-file-fetch"
+          )
+
+          # Display and count
+          for branch in "${branches[@]}"; do
+            echo "  - $branch"
+          done
+          echo ""
+          echo "Total: ${#branches[@]} branches"
+          echo ""
+
+          # Delete each branch
+          deleted=0
+          failed=0
+
+          for branch in "${branches[@]}"; do
+            echo -n "Deleting '$branch'... "
+
+            # Check if branch exists
+            if git ls-remote --heads origin "$branch" | \
+              grep -q "refs/heads/$branch$"; then
+              if git push origin --delete "$branch" 2>&1; then
+                echo "✓ Deleted"
+                ((deleted++))
+              else
+                echo "✗ Failed"
+                ((failed++))
+              fi
+            else
+              echo "⊘ Not found (may already be deleted)"
+              ((failed++))
+            fi
+          done
+
+          echo ""
+          echo "=============================================================="
+          echo "Summary:"
+          echo "  Successfully deleted: $deleted"
+          echo "  Failed/Not found: $failed"
+          echo "=============================================================="
+          echo ""
+          echo "Remaining branches:"
+          git ls-remote --heads origin | \
+            awk '{print $2}' | sed 's|refs/heads/||' | sort
