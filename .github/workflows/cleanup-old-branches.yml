@@ -1,30 +1,31 @@
+---
 name: Cleanup Old Branches
 
 on:
-  workflow_dispatch:  # Allows manual triggering from GitHub Actions UI
+  workflow_dispatch:
 
 jobs:
   cleanup-branches:
     runs-on: ubuntu-latest
     permissions:
-      contents: write  # Required to delete branches
-    
+      contents: write
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # Fetch all history for all branches
-      
+          fetch-depth: 0
+
       - name: Delete old branches
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "================================================================"
+          echo "=============================================================="
           echo "Branch Cleanup Workflow"
-          echo "================================================================"
+          echo "=============================================================="
           echo ""
           echo "Branches to be deleted:"
-          
+
           # List of branches to delete
           branches=(
             "container"
@@ -45,7 +46,7 @@ jobs:
             "test-chat-agent-interactions"
             "testing-file-fetch"
           )
-          
+
           # Display and count
           for branch in "${branches[@]}"; do
             echo "  - $branch"
@@ -53,16 +54,17 @@ jobs:
           echo ""
           echo "Total: ${#branches[@]} branches"
           echo ""
-          
+
           # Delete each branch
           deleted=0
           failed=0
-          
+
           for branch in "${branches[@]}"; do
             echo -n "Deleting '$branch'... "
-            
+
             # Check if branch exists
-            if git ls-remote --heads origin "$branch" | grep -q "$branch"; then
+            if git ls-remote --heads origin "$branch" | \
+              grep -q "$branch"; then
               if git push origin --delete "$branch" 2>&1; then
                 echo "✓ Deleted"
                 ((deleted++))
@@ -75,13 +77,14 @@ jobs:
               ((failed++))
             fi
           done
-          
+
           echo ""
-          echo "================================================================"
+          echo "=============================================================="
           echo "Summary:"
           echo "  Successfully deleted: $deleted"
           echo "  Failed/Not found: $failed"
-          echo "================================================================"
+          echo "=============================================================="
           echo ""
           echo "Remaining branches:"
-          git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||' | sort
+          git ls-remote --heads origin | \
+            awk '{print $2}' | sed 's|refs/heads/||' | sort
