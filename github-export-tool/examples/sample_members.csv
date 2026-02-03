@@ -1,0 +1,4 @@
+id,login,name,email,type,site_admin,company,location,bio,created_at,updated_at
+11111111,alice-dev,Alice Developer,alice@example.com,User,false,Example Org,"New York, NY",Full-stack developer passionate about open source,2018-03-10T08:20:00Z,2024-01-18T12:00:00Z
+22222222,bob-engineer,Bob Engineer,bob@example.com,User,false,Example Org,"Seattle, WA",Backend engineer with expertise in cloud infrastructure,2019-06-22T14:30:00Z,2024-01-19T09:15:00Z
+33333333,carol-designer,Carol Designer,carol@example.com,User,false,Example Org,"Austin, TX",UX/UI designer focusing on accessibility,2020-01-05T11:00:00Z,2024-01-17T16:30:00Z

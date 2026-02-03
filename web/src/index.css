@@ -1,0 +1,96 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-github-bgSecondary text-github-text antialiased;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans', Helvetica, Arial, sans-serif;
+  }
+
+  html.dark body {
+    @apply bg-dark-bg text-dark-text;
+  }
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-github-bgSecondary;
+}
+
+html.dark ::-webkit-scrollbar-track {
+  @apply bg-dark-bg;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-github-border rounded-full;
+}
+
+html.dark ::-webkit-scrollbar-thumb {
+  @apply bg-dark-border;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-github-textSecondary;
+}
+
+html.dark ::-webkit-scrollbar-thumb:hover {
+  @apply bg-dark-textSecondary;
+}
+
+/* Chart tooltip styles */
+.recharts-tooltip-wrapper {
+  z-index: 50 !important;
+}
+
+.recharts-default-tooltip {
+  @apply bg-white border border-github-border rounded-lg shadow-dropdown !important;
+  padding: 8px 12px !important;
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideInRight {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.3s ease-out;
+}
+
+.animate-slide-in-right {
+  animation: slideInRight 0.3s ease-out;
+}
