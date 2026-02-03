@@ -5,7 +5,7 @@
 set -e
 
 echo "================================================================"
-echo "Branch Cleanup Script for Github-Copilot-Usage-Insights"
+echo "Branch Cleanup Script for GitHub-Copilot-Usage-Insights"
 echo "================================================================"
 echo ""
 echo "This script will delete the following branches from the remote repository:"

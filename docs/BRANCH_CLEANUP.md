@@ -1,7 +1,7 @@
 # Branch Cleanup Documentation
 
 ## Overview
-This document describes the process for cleaning up old branches in the Github-Copilot-Usage-Insights repository.
+This document describes the process for cleaning up old branches in the GitHub-Copilot-Usage-Insights repository.
 
 ## Branches Identified for Removal
 The following branches have been identified as old/obsolete and should be removed, keeping only the `main` branch:
