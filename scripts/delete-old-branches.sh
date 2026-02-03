@@ -76,6 +76,6 @@ echo "  Successfully deleted: $deleted_count branches"
 echo "  Failed/Not found: $failed_count branches"
 echo "================================================================"
 echo ""
-echo "Remaining branches:"
-git branch -r | grep -v "HEAD" | sed 's/origin\///' | sed 's/^[ \t]*//'
+echo "Remaining branches (fetching current state from remote):"
+git ls-remote --heads origin | awk '{print $2}' | sed 's|refs/heads/||' | sort
 echo ""

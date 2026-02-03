@@ -64,7 +64,7 @@ jobs:
 
             # Check if branch exists
             if git ls-remote --heads origin "$branch" | \
-              grep -q "$branch"; then
+              grep -q "refs/heads/$branch$"; then
               if git push origin --delete "$branch" 2>&1; then
                 echo "✓ Deleted"
                 ((deleted++))
