@@ -80,8 +80,8 @@ A data anonymization tool used to generate the demo data in this project. It:
 
 ```bash
 # Clone the repository
-git clone https://github.com/benarch/github-copilot-usage-extended.git
-cd github-copilot-usage-extended
+git clone https://github.com/benarch/Github-Copilot-Usage-Insights.git
+cd Github-Copilot-Usage-Insights
 
 # Install dependencies
 npm run install:all
@@ -267,3 +267,34 @@ flowchart LR
     SEARCH_USERS --> TEAM_METRICS
     SORT_METRICS --> EXPORT_REPORT
 ```
+
+---
+
+## Synthetic Data for Functionality Tests
+
+The [`synthetic_data_for_functionality_tests/`](synthetic_data_for_functionality_tests/) folder contains anonymized demo datasets to help you explore the dashboard's capabilities and test different data scenarios without needing to export real organizational data.
+
+### Dashboard & Features Testing
+
+To review the look and feel of the dashboard and explore usage, trends, and view capabilities, use any of these files:
+
+- **ben-test-it-anonymized-1836-records.ndjson** - Comprehensive dataset with 1,836 user records in newline-delimited JSON format
+- **copilot-usage-2026-02-01.csv** - CSV format usage data for February 1, 2026
+- **copilot-usage-2026-02-01.ndjson** - Newline-delimited JSON format for the same date
+- **demo-data-github-copilot-usage-anonymized-823-records.json** - Smaller JSON dataset with 823 records (ideal for quick testing)
+- **extensive-models-demo-data-copilot-usage-2026-02-01.csv** - Comprehensive CSV with model usage variations
+- **extensive-models-demo-data-copilot-usage-with_ide-variation-2026-02-01.json** - JSON data showing IDE distribution across models and usage patterns
+
+**How to use:** Upload any of these files to the **Insights** tab to populate the dashboard with usage metrics, charts, and detailed reports.
+
+### Team & Organizational Correlation Testing
+
+To review data showing correlation between users, team membership, and aggregated team usage metrics, use the files in the [`correlated-data/`](synthetic_data_for_functionality_tests/correlated-data/) subfolder:
+
+- **correlated--demo-data-copilot-usage-missing-some-views.json** - Usage data with partial team coverage (useful for testing incomplete data scenarios)
+- **correlated--demo-data-users.csv** - User roster with team membership information
+
+**How to use:**
+1. First, upload the `correlated--demo-data-users.csv` file to the **Teams** tab
+2. Then, upload the `correlated--demo-data-copilot-usage-missing-some-views.json` file to the **Insights** tab
+3. This enables the **Teams View** for aggregated team metrics and nested organizational hierarchy views
