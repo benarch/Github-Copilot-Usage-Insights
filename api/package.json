@@ -32,6 +32,6 @@
     "@types/swagger-ui-express": "^4.1.6",
     "tsx": "^4.7.0",
     "typescript": "^5.3.3",
-    "vitest": "^1.2.0"
+    "vitest": "^4.0.18"
   }
 }
